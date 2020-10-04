@@ -38,6 +38,9 @@ rc_led_set(RC_LED_GREEN,0); \
 rc_led_blink(RC_LED_RED,8.0,2.0); \
 return -1;
 
+
+
+
 void print_usage()
 {
 	printf("\n");

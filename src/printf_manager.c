@@ -278,6 +278,9 @@ int print_flight_mode(flight_mode_t mode){
 	case AUTONOMOUS:
 		printf("%sAUTONOMOUS  %s",KBLU,KNRM);
 		return 0;
+	case OPEN_LOOP_DESCENT:
+        printf("%sOPN_LOOP_DESCNT%s", KBLU, KNRM);
+        return 0;
 	default:
 		fprintf(stderr,"ERROR in print_flight_mode, unknown flight mode\n");
 		return -1;

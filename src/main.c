@@ -268,6 +268,11 @@ int main(int argc, char *argv[])
 		FAIL("ERROR: failed to initialize encoder\n")
 	}
 
+	printf("initializing sensor calculation\n");
+	if(sensor_calc_init()<0){
+		FAIL("ERROR: failed to sensor calculation\n")
+	}
+
 	// set up state estimator
 	printf("initializing state_estimator\n");
 	if(state_estimator_init()<0){

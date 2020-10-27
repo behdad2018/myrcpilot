@@ -192,6 +192,17 @@ int setpoint_manager_update(void)
 		__update_Z();
 		__update_yaw();
 		break;	
+// B: need to find where we can define feedforward, etc 
+	case SENSEDAUTONOMOUS:
+	    setpoint.en_feedfroward	= 1;
+		setpoint.en_6dof	= 0;
+		setpoint.en_rpy_ctrl	= 1;
+		setpoint.en_Z_ctrl	= 1;
+		setpoint.en_XY_vel_ctrl	= 0;
+		setpoint.en_XY_pos_ctrl	= 1;
+		__update_Z();
+		__update_yaw();
+		break;	
 	case ALT_HOLD_4DOF:
 		setpoint.en_6dof	= 0;
 		setpoint.en_rpy_ctrl	= 1;
@@ -273,6 +284,24 @@ int setpoint_manager_update(void)
 		__update_Z();
 		__update_yaw();
 		break;
+
+    case OPEN_LOOP_DESCENT:
+        setpoint.en_6dof = 0;
+        setpoint.en_rpy_ctrl = 1;
+        setpoint.en_Z_ctrl = 0;
+        setpoint.en_XY_vel_ctrl = 0;
+        setpoint.en_XY_pos_ctrl = 0;
+        setpoint.en_hover = 0;
+
+        setpoint.roll = 0;
+        setpoint.pitch = 0;
+
+        //-0.6 is close to hovering. Make the value closer to zero (less negative) if you want to descend faster. 
+        //This parameter will also depend on the weight of the vehicle.
+        setpoint.Z_throttle = settings.dropout_z_throttle;
+        
+        setpoint_update_yaw();
+       break;
 
 	default: // should never get here
 		fprintf(stderr,"ERROR in setpoint_manager thread, unknown flight mode\n");

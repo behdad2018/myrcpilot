@@ -562,6 +562,14 @@ int settings_load_from_file(char* path)
 	#endif
 	PARSE_BOOL(enable_magnetometer)
 
+	// EMERGENCY LANDING SETTINGS
+    PARSE_BOOL(enable_mocap_dropout_emergency_land)
+    PARSE_DOUBLE_MIN_MAX(mocap_dropout_timeout_ms, 0, 10000)
+    PARSE_DOUBLE_MIN_MAX(dropout_z_throttle, -1, 0)
+	#ifdef DEBUG
+    fprintf(stderr, "enable_mocap_dropout_emergency_land: %d\n", settings.enable_mocap_dropout_emergency_land);
+    fprintf(stderr, "mocap_dropout_timeout_ms: %lf\n", settings.mocap_dropout_timeout_ms);
+	#endif   
 
 	// FLIGHT MODES
 	PARSE_INT_MIN_MAX(num_dsm_modes,1,3)

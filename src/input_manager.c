@@ -19,11 +19,12 @@
 #include <rc_pilot_defs.h>
 #include <thread_defs.h>
 #include <setpoint_manager.h>
+#include <flight_mode.h>
 
 user_input_t user_input; // extern variable in input_manager.h
 
 static pthread_t input_manager_thread;
-
+static bool enabled_emergency_land;
 /**
 * float apply_deadzone(float in, float zone)
 *
@@ -214,6 +215,44 @@ void new_dsm_data_callback()
 		break;
 	}
 
+    //If we need MOCAP and it is no longer available and the user has indicated
+    //they want an emergency landing in case of dropouts, 
+    //then manage switching into and out of to OPEN_LOOP_DESCENT
+	if( mode_needs_mocap(user_input.flight_mode) && 
+        settings. enable_mocap_dropout_emergency_land)
+	{
+        //Compute time since last MOCAP packet was received (in milliseconds)
+        double ms_since_mocap = (rc_nanos_since_epoch() - state_estimate.xbee_time_received_ns) / 1e6;
+
+        //If MOCAP has been out for too long, then enable emergency landing
+        if( enabled_emergency_land==false && 
+            ms_since_mocap >= settings.mocap_dropout_timeout_ms &&
+            user_input.requested_arm_mode == ARMED)
+        {
+            //Enable Emergency landing. 
+            //This extra check is done so that we don't exit emergency landing if MOCAP becomes available suddenly
+            enabled_emergency_land = true;
+            //fprintf(stderr, "ENABLE EMERGENCY LANDING MODE: Throttle %lf \n", settings.dropout_z_throttle);
+        }
+
+        //Force flight mode to be OPEN_LOOP_DESCENT as long as emergency landing is enables
+        if(enabled_emergency_land)
+        {
+            user_input.flight_mode = OPEN_LOOP_DESCENT;
+        }
+        
+	}
+    else
+    {
+     	// if(enabled_emergency_land == true)
+        // {
+        //     fprintf(stderr, "DISABLE EMERGENCY LANDING MODE\n");
+        // }
+        //Turn off emergency landing if we enter a mode that does NOT need MOCAP
+        enabled_emergency_land = false;
+    }
+    
+
 	// fill in sticks
 	if(user_input.requested_arm_mode==ARMED){
 		user_input.thr_stick   = new_thr;
@@ -285,6 +324,7 @@ void* input_manager(void* ptr)
 
 int input_manager_init()
 {
+	enabled_emergency_land = false;
 	user_input.initialized = 0;
 	int i;
 	// start dsm hardware

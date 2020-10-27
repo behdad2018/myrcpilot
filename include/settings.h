@@ -42,6 +42,18 @@ typedef struct settings_t{
 	int enable_magnetometer; // we suggest leaving as 0 (mag OFF)
 	///@}
 
+    //True if you want to automatically enter OPEN_LOOP_DESCENT if using a mode that
+    //requires MOCAP and mocap has been unavailable for 'mocap_dropout_timeout_ms' ms
+    //OPEN_LOOP_DESCENT commands 0 roll, 0 pitch, and throttle of 'dropout_z_throttle'
+    //One can exit this mode by switching to a controller mode that doesn't require MOCAP
+
+    int enable_mocap_dropout_emergency_land;
+    double mocap_dropout_timeout_ms;
+
+    //-0.6 is close to hovering. Make the value closer to zero (less negative) if you want to descend faster. 
+    //This parameter will also depend on the weight of the vehicle.
+    double dropout_z_throttle;
+    
 	/** @name flight modes */
 	///@{
 	int num_dsm_modes;

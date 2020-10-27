@@ -4,7 +4,7 @@
 
 #ifndef FLIGHT_MODE_H
 #define FLIGHT_MODE_H
-
+#include <stdbool.h>
 /**
  * This is how the user interacts with the setpoint manager.
  */
@@ -67,7 +67,14 @@ typedef enum flight_mode_t{
 	 */
 	POSITION_CONTROL_6DOF,
 
-	AUTONOMOUS
+	AUTONOMOUS,
+
+	/**
+     * Commands 0 roll, 0 pitch, and a fixed throttle to hover or slowely descend
+     * Useful as an emergency mode if MOCAP drops out for too long
+      */
+
+	OPEN_LOOP_DESCENT
 
 
 } flight_mode_t;

@@ -31,7 +31,7 @@ void calculate_thrust() {
         lb = sensor_calc_msmt.rpm - 500;
         ub = sensor_calc_msmt.rpm + 500
     }
-    sensor_calc_msmt.rpm = thrust(sensor_calc_msmt.rpm - 500, sensor_calc_msmt.rpm + 500,sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
+    sensor_calc_msmt.rpm = thrust(lb, ub, sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
 }
 
 void* sensor_calc_manager(void* ptr) {

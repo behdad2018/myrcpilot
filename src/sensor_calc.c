@@ -25,7 +25,13 @@ void read_sensor_data() {
 }
 
 void calculate_thrust() {
-    sensor_calc_msmt.rpm = thrust(100.F,12000.F,sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
+    double lb = 100;
+    double ub = 12000;
+    if (sensor_calc_msmt.rpm > 0) { // If rpm has already been calculated once.
+        lb = sensor_calc_msmt.rpm - 500;
+        ub = sensor_calc_msmt.rpm + 500
+    }
+    sensor_calc_msmt.rpm = thrust(sensor_calc_msmt.rpm - 500, sensor_calc_msmt.rpm + 500,sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
 }
 
 void* sensor_calc_manager(void* ptr) {

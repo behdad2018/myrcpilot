@@ -25,7 +25,7 @@ void read_sensor_data() {
 }
 
 void calculate_thrust() {
-    sensor_calc_mst.rpm = thrust(100.F,12000.F,thrust_inp,data.rho[0],data.vel);
+    sensor_calc_msmt.rpm = thrust(100.F,12000.F,sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
 }
 
 void* sensor_calc_manager(void* ptr) {

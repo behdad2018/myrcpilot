@@ -19,99 +19,24 @@ Extern var sensor_calc_msmt_t sensor_calc_msmt;
 
 static pthread_t sensor_calc_thread;
 
+void read_sensor_data() {
+}
 
-void 
-// void on_tag_pose(const lcm_recv_buf_t *rbuf, const char* channel, const tag_pose_t* msg, void* user) {
-//     if (msg->detected) {
-//         rc_vector_t tb = RC_VECTOR_INITIALIZER;
-//         rc_vector_t quat = RC_VECTOR_INITIALIZER;
-//         rc_vector_zeros(&tb, 3);
-
-//         tb.d[1] = -state_estimate.tb_imu[1];
-//         tb.d[0] = -state_estimate.tb_imu[0];
-//         //tb.d[2] = 3.14159/2;
-
-//         double pos[3] = {msg->pos[1], -msg->pos[0], -msg->pos[2]};
-//         //apriltag_msmt.fx = pos[0];
-//         //apriltag_msmt.fy = pos[1];
-//         //apriltag_msmt.fz = pos[2];
-
-//         rc_quaternion_from_tb(tb, &quat);
-//         rc_quaternion_rotate_vector_array(pos, quat.d);
-
-//         double vx = (pos[0] - apriltag_msmt.x)/(1e-9 * (rc_nanos_since_boot() - apriltag_msmt.ntime));
-//         apriltag_msmt.x = pos[0];
-
-//         double vy = (pos[1] - apriltag_msmt.y)/(1e-9 * (rc_nanos_since_boot() - apriltag_msmt.ntime));
-//         apriltag_msmt.y = pos[1];
-
-//         pos[2] += 0.022;
-//         double vz = (pos[2] - apriltag_msmt.z)/(1e-9 * (rc_nanos_since_boot() - apriltag_msmt.ntime));
-//         apriltag_msmt.z = pos[2];
-
-//         if (!apriltag_msmt.detected) {
-//             vx = 0;
-//             vy = 0;
-//             vz = 0;
-//         }
-
-//         double alpha = 0.9;
-//         apriltag_msmt.vx = alpha*vx + (1-alpha)*apriltag_msmt.vx;
-//         apriltag_msmt.vy = alpha*vy + (1-alpha)*apriltag_msmt.vy;
-//         apriltag_msmt.vz = alpha*vz + (1-alpha)*apriltag_msmt.vz;
-
-//         double fx = settings.at_kp*(apriltag_msmt.x - setpoint.X) + settings.at_kd*apriltag_msmt.vx;
-//         if (fx > MAX_ANGLE) {
-//             fx = MAX_ANGLE;
-//         }
-//         if (fx < -MAX_ANGLE) {
-//             fx = -MAX_ANGLE;
-//         }
-//         apriltag_msmt.fx = fx;
-//         double fy = -settings.at_kp*(apriltag_msmt.y - setpoint.Y) + settings.at_kd*apriltag_msmt.vy;
-//         if (fy > MAX_ANGLE) {
-//             fy = MAX_ANGLE;
-//         }
-//         if (fy < -MAX_ANGLE) {
-//             fy = -MAX_ANGLE;
-//         }
-//         apriltag_msmt.fy = fy;
-//         double fz = settings.at_kp*apriltag_msmt.z + settings.at_kd*apriltag_msmt.vz;
-//         if (fz > MAX_ANGLE) {
-//             fz = MAX_ANGLE;
-//         }
-//         if (fz < -MAX_ANGLE) {
-//             fz = -MAX_ANGLE;
-//         }
-//         apriltag_msmt.fz = fz;
-//     } else {
-//         apriltag_msmt.fx = 0;
-//         apriltag_msmt.fy = 0;
-//         apriltag_msmt.fz = 0;
-//     }
-
-//     apriltag_msmt.detected = msg->detected;
-//     apriltag_msmt.ntime = rc_nanos_since_boot();
-// }
+void calculate_thrust() {
+}
 
 void* sensor_calc_manager(void* ptr) {
-    lcm_t* lcm = lcm_create(NULL);
-    if (!lcm) {
-        return NULL;
-    }
-
     sensor_calc_msmt.initialized = 1;
 
     printf("Initialized sensor_calc.\n");
 
-    tag_pose_t_subscribe(lcm, "DETECTIONS", &on_tag_pose, NULL);
 
     while(rc_get_state()!=EXITING){
-        lcm_handle(lcm);
+        read_sensor_data();
+        calculate_thrust();
         rc_usleep(100);
     }
 
-    lcm_destroy(lcm);
     return NULL;
 }
 

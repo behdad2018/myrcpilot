@@ -12,17 +12,19 @@
 #include <settings.h>
 #include <setpoint_manager.h>
 #include <rc/time.h>
-
+#include "read_from_serial.h"
+#include "thrust.h"
 
 
 Extern var sensor_calc_msmt_t sensor_calc_msmt;
 
 static pthread_t sensor_calc_thread;
 
-void read_sensor_data() {
-}
+read_from_serial()
 
 void calculate_thrust() {
+
+    float rpm = thrust(100.F,12000.F,thrust_inp,data.rho[0],data.vel);
 }
 
 void* sensor_calc_manager(void* ptr) {

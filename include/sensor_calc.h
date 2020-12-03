@@ -9,4 +9,7 @@ typedef struct sensor_calc_msmt {
 
 extern sensor_calc_msmt_t sensor_calc_msmt;
 
+int sensor_calc_manager_init();
+int sensor_calc_manager_cleanup();
+
 #endif

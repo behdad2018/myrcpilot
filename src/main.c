@@ -27,6 +27,7 @@
 #include <state_estimator.h>
 #include <log_manager.h>
 #include <printf_manager.h>
+#include <sensor_calc.h>
 //B:
 #include <xbee_packet_t.h>
 #include <rc/encoder.h>

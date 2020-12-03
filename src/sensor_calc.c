@@ -1,25 +1,18 @@
+#include <sensor_calc.h>
+
 #include <stdio.h>
-#include <apriltag_manager.h>
 #include <vl53l1x.h>
 #include <robotcontrol.h>
 #include <rc/start_stop.h>
 #include <rc/pthread.h>
 #include <rc/time.h>
 #include <thread_defs.h>
-#include <lcm/lcm.h>
-#include <tag_pose_t.h>
-#include <state_estimator.h>
-#include <settings.h>
-#include <setpoint_manager.h>
 #include <rc/time.h>
-#include "read_from_serial.h"
-#include "thrust.h"
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <read_from_serial.h>
 
 // Definition of our global sensor_calc_msmt variable.
 sensor_calc_msmt_t sensor_calc_msmt;

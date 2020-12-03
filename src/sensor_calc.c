@@ -14,27 +14,94 @@
 #include <rc/time.h>
 #include "read_from_serial.h"
 #include "thrust.h"
-
+#include <fcntl.h>
+#include <termios.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <read_from_serial.h>
 
 Extern var sensor_calc_msmt_t sensor_calc_msmt;
 
 static pthread_t sensor_calc_thread;
 
-void read_sensor_data() {
-    read_from_serial()
+
+float init_read_from_serial()
+{
+
+  char port[20] = "/dev/ttyO5"; /* port to connect to */
+  speed_t baud = B115200; /* baud rate */
+  sensor_calc_msmt.fd = open(port, O_RDWR); /* connect to port */
+
+  /* set the other settings (in this case, 9600 8N1) */
+  struct termios settings;
+  tcgetattr(fd, &settings);
+
+  cfsetospeed(&settings, baud); /* baud rate */
+  settings.c_cflag &= ~PARENB; /* no parity */
+  settings.c_cflag &= ~CSTOPB; /* 1 stop bit */
+  settings.c_cflag &= ~CSIZE;
+  settings.c_cflag |= CS8 | CLOCAL; /* 8 bits */
+  settings.c_lflag = ICANON; /* canonical mode */
+  settings.c_oflag &= ~OPOST; /* raw output */
+
+  tcsetattr(sensor_calc_msmt.fd, TCSANOW, &settings); /* apply the settings */
+  tcflush(sensor_calc_msmt.fd, TCOFLUSH);
+    
 }
 
-void calculate_thrust() {
-    double lb = 100;
-    double ub = 12000;
-    if (sensor_calc_msmt.rpm > 0) { // If rpm has already been calculated once.
-        lb = sensor_calc_msmt.rpm - 500;
-        ub = sensor_calc_msmt.rpm + 500
-    }
-    sensor_calc_msmt.rpm = thrust(lb, ub, sensor_calc_msmt.thrust_inp,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
+void read_sensor_data() {
+  int bytes_read = 1;
+  int i=-1;
+  char array[1500];
+
+  char *ptr;
+  while (bytes_read>0) {
+	i=i+1;
+	char c = 0;
+	bytes_read = read(sensor_calc_msmt.fd, &c, 1);
+	array[i]=c;
+	if (c == '\n') {
+		const char s[] = " ";
+		char* token = strtok(array,s);
+		int j = -1;
+		while (token != NULL) {
+			token = strtok(NULL,s);
+			j=j+1;
+			//printf(" %s\n", token);
+			if (j==4){
+				sensor_calc_msmt.vel[0]=strtod(token, &ptr);
+			}
+			else if (j==6){
+				sensor_calc_msmt.vel[1]=strtod(token, &ptr);
+			}
+			else if (j==8){
+				sensor_calc_msmt.vel[2]=strtod(token, &ptr);
+			}
+			else if (j==16){
+				sensor_calc_msmt.rho =strtod(token, &ptr);
+			}
+	    }
+
+	    break;
+	}
+  }
+    
+  printf("%c",array);
+  printf("%lf\n",wind_data.vel[0]);	
+  printf("%lf\n",wind_data.vel[1]);	
+  printf("%lf\n",wind_data.vel[2]);
+  
 }
 
 void* sensor_calc_manager(void* ptr) {
+    sensor_calc_msmt.vel[0] = 0;
+    sensor_calc_msmt.vel[1] = 0;
+    sensor_calc_msmt.vel[2] = 0;
+    sensor_calc_msmt.rho = 1;
+    
+    init_read_from_sensor();
+    
     sensor_calc_msmt.initialized = 1;
 
     printf("Initialized sensor_calc.\n");
@@ -42,10 +109,10 @@ void* sensor_calc_manager(void* ptr) {
 
     while(rc_get_state()!=EXITING){
         read_sensor_data();
-        calculate_thrust();
+        //calculate_thrust();
         rc_usleep(100);
     }
-
+    close(sensor_calc_msmt.fd);
     return NULL;
 }
 
@@ -68,6 +135,7 @@ int sensor_calc_manager_init() {
 }
 
 int sensor_calc_manager_cleanup() {
+
     if(sensor_calc_msmt.initialized==0){
         fprintf(stderr, "WARNING in sensor_calc_manager_cleanup, was never initialized\n");
         return -1;

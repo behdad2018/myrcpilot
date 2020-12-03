@@ -21,7 +21,8 @@
 #include <stdlib.h>
 #include <read_from_serial.h>
 
-Extern var sensor_calc_msmt_t sensor_calc_msmt;
+// Definition of our global sensor_calc_msmt variable.
+sensor_calc_msmt_t sensor_calc_msmt;
 
 static pthread_t sensor_calc_thread;
 

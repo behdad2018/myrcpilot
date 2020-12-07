@@ -26,7 +26,7 @@ user_input_t user_input; // extern variable in input_manager.h
 static pthread_t input_manager_thread;
 static bool enabled_emergency_land;
 
-static bool enabled_emergency_land;
+static bool enabled_emergency_land = false;
 
 /**
 * float apply_deadzone(float in, float zone)

@@ -1,0 +1,10 @@
+CC=gcc
+INC_DIR1=.
+CFLAGS=-I$(INC_DIR1) -lm -O3 -march=native -mfloat-abi=hard -mfpu=neon -funsafe-math-optimizations -fopenmp-simd -O3 -ffast-math -ftree-vectorize
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+all: $(OBJS)
+
+

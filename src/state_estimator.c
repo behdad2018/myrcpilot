@@ -177,33 +177,34 @@ static int __altitude_init(void)
 {
 
 	// ****B:
+// 	fprintf(stderr,"check\n");
+// 	status = VL53L1X_InitDriver(&Device, i2cbus, addr);
+// 	fprintf(stderr,"check\n");
+// 	if(status!=0){
+// 		printf("ERROR: VL53LX Not Responding\n");
+// 		return -1;;
+// 	}
+// //	rc_usleep(1E4);
+// 	printf("Initializing Sensor...\n");
+// 	VL53L1X_SensorInit(&Device);
+// //	rc_usleep(1E4);
 
-	status = VL53L1X_InitDriver(&Device, i2cbus, addr);
-	if(status!=0){
-		printf("ERROR: VL53LX Not Responding\n");
-		return -1;;
-	}
-//	rc_usleep(1E4);
-	printf("Initializing Sensor...\n");
-	VL53L1X_SensorInit(&Device);
-//	rc_usleep(1E4);
+// 	//VL53L1X_SetDistanceMode(&Device,2);
+// 	//VL53L1X_SetInterMeasurementInMs(&Device,200);
+// 	//VL53L1X_SetTimingBudgetInMs(&Device,100);
 
-	//VL53L1X_SetDistanceMode(&Device,2);
-	//VL53L1X_SetInterMeasurementInMs(&Device,200);
-	//VL53L1X_SetTimingBudgetInMs(&Device,100);
+// //	rc_usleep(1E4);
+// 	VL53L1X_GetDistanceMode(&Device,&rtn);
+// 	printf("Distance Mode: %d\n", rtn);
 
-//	rc_usleep(1E4);
-	VL53L1X_GetDistanceMode(&Device,&rtn);
-	printf("Distance Mode: %d\n", rtn);
+// 	VL53L1X_GetInterMeasurementInMs(&Device,&rtn);
+// 	printf("Measurement Period: %dms\n", rtn);
+// 	uint16_t rate = rtn;
 
-	VL53L1X_GetInterMeasurementInMs(&Device,&rtn);
-	printf("Measurement Period: %dms\n", rtn);
-	uint16_t rate = rtn;
+// 	VL53L1X_GetTimingBudgetInMs(&Device,&rtn);
+// 	printf("Timing Budget: %dms\n", rtn);
 
-	VL53L1X_GetTimingBudgetInMs(&Device,&rtn);
-	printf("Timing Budget: %dms\n", rtn);
-
-	// *****
+	// ***** B
 	//initialize altitude kalman filter and bmp sensor
 	rc_matrix_t F = RC_MATRIX_INITIALIZER;
 	rc_matrix_t G = RC_MATRIX_INITIALIZER;

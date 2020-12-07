@@ -300,7 +300,7 @@ int setpoint_manager_update(void)
         //This parameter will also depend on the weight of the vehicle.
         setpoint.Z_throttle = settings.dropout_z_throttle;
         
-        setpoint_update_yaw();
+        __update_yaw();
        break;
 
 	default: // should never get here

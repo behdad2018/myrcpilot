@@ -5,6 +5,7 @@ typedef struct sensor_calc_msmt {
   float vel[3];
   float rho;
   int fd;
+  int initialized;
 } sensor_calc_msmt_t;
 
 extern sensor_calc_msmt_t sensor_calc_msmt;

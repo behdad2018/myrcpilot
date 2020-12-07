@@ -12,6 +12,6 @@ typedef struct loc_t2{
 	float zTraj[nmax2];
 } loc_t2;
 
-loc_t2 loc2;:q
+loc_t2 loc2;
 
 #endif // TRAJE:qCTORY

@@ -240,6 +240,11 @@ int main(int argc, char *argv[])
 	if(input_manager_init()<0){
 		FAIL("ERROR: failed to initialize input_manager\n")
 	}
+	//B:
+    printf("initializing sensor_calc_manager\n");
+    if (sensor_calc_manager_init() < 0) {
+        FAIL("ERROR: failed to initialize sensor_calc_manager\n");
+    }
 
 	// initialize buttons and Assign functions to be called when button
 	// events occur
@@ -267,11 +272,6 @@ int main(int argc, char *argv[])
 	printf("initializing revolution counter\n");
 	if(rc_encoder_init()<0){
 		FAIL("ERROR: failed to initialize encoder\n")
-	}
-
-	printf("initializing sensor calculation\n");
-	if(sensor_calc_init()<0){
-		FAIL("ERROR: failed to sensor calculation\n")
 	}
 
 	// set up state estimator
@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
 	printf_cleanup();
 	log_manager_cleanup();
 	rc_encoder_cleanup();
+	sensor_calc_manager_cleanup();
 
 	// turn off red LED and blink green to say shut down was safe
 	rc_led_set(RC_LED_RED,0);

@@ -367,10 +367,10 @@ int feedback_march(void)
 				//if ((pow(pos_er_x,2)+pow(pos_er_y,2))>=0.03){
 					setpoint.pitch = rc_filter_march(&D_X_4, - pos_er_x);
 					setpoint.roll = rc_filter_march(&D_Y_4, pos_er_y);
-					if (setpoint.en_feedforward){
+					// if (setpoint.en_feedforward){
 
 						
-					}
+					// }
 				//}
 				// otherwise do command anything bc quad-copter is close enough
 				//else {

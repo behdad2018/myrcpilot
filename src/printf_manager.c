@@ -144,8 +144,10 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 		}
 		__reset_colour();
 		if(settings.printf_altitude){
-			printf("%s%+5.2f |%+5.2f |",	__next_colour(),\
-							state_estimate.lidar,\
+			// printf("%s%+5.2f |%+5.2f |",	__next_colour(),\
+			// 				state_estimate.lidar,\
+			// 				state_estimate.alt_bmp_vel);
+			printf("%s%+5.2f|",	__next_colour(),\
 							state_estimate.alt_bmp_vel);
 		}
 		if(settings.printf_rpy){

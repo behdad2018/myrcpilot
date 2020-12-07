@@ -1,5 +1,4 @@
 #include <sensor_calc.h>
-
 #include <stdio.h>
 #include <vl53l1x.h>
 #include <robotcontrol.h>
@@ -14,10 +13,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+
+#define SENSOR_CALC_MANAGER_PRI 40
+#define SENSOR_CALC_MANAGER_TOUT 0.5
+
+
 // Definition of our global sensor_calc_msmt variable.
 sensor_calc_msmt_t sensor_calc_msmt;
 
-static pthread_t sensor_calc_thread;
+static pthread_t sensor_calc_manager_thread;
 
 
 float init_read_from_serial()
@@ -29,7 +33,7 @@ float init_read_from_serial()
 
   /* set the other settings (in this case, 9600 8N1) */
   struct termios settings;
-  tcgetattr(fd, &settings);
+  tcgetattr(sensor_calc_msmt.fd, &settings);
 
   cfsetospeed(&settings, baud); /* baud rate */
   settings.c_cflag &= ~PARENB; /* no parity */
@@ -81,10 +85,10 @@ void read_sensor_data() {
 	}
   }
     
-  printf("%c",array);
-  printf("%lf\n",wind_data.vel[0]);	
-  printf("%lf\n",wind_data.vel[1]);	
-  printf("%lf\n",wind_data.vel[2]);
+  //printf("%c",array);
+  printf("%lf\n",sensor_calc_msmt.vel[0]);	
+  printf("%lf\n",sensor_calc_msmt.vel[1]);	
+  printf("%lf\n",sensor_calc_msmt.vel[2]);
   
 }
 
@@ -94,7 +98,7 @@ void* sensor_calc_manager(void* ptr) {
     sensor_calc_msmt.vel[2] = 0;
     sensor_calc_msmt.rho = 1;
     
-    init_read_from_sensor();
+    init_read_from_serial();
     
     sensor_calc_msmt.initialized = 1;
 

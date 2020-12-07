@@ -193,7 +193,7 @@ int setpoint_manager_update(void)
 		__update_yaw();
 		break;	
 // B: need to find where we can define feedforward, etc 
-	case SENSEDAUTONOMOUS:
+	/*case SENSEDAUTONOMOUS:
 	    setpoint.en_feedfroward	= 1;
 		setpoint.en_6dof	= 0;
 		setpoint.en_rpy_ctrl	= 1;
@@ -202,7 +202,7 @@ int setpoint_manager_update(void)
 		setpoint.en_XY_pos_ctrl	= 1;
 		__update_Z();
 		__update_yaw();
-		break;	
+		break;	*/
 	case ALT_HOLD_4DOF:
 		setpoint.en_6dof	= 0;
 		setpoint.en_rpy_ctrl	= 1;
@@ -291,7 +291,7 @@ int setpoint_manager_update(void)
         setpoint.en_Z_ctrl = 0;
         setpoint.en_XY_vel_ctrl = 0;
         setpoint.en_XY_pos_ctrl = 0;
-        setpoint.en_hover = 0;
+        //setpoint.en_hover = 0;
 
         setpoint.roll = 0;
         setpoint.pitch = 0;

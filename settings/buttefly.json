@@ -10,8 +10,6 @@
 
 	"enable_magnetometer": false,
 
-	"enable_mocap_dropout_emergency_land": false,
-	"mocap_dropout_timeout_ms": 200.0,
 	"enable_mocap_dropout_emergency_land": true,
 	"mocap_dropout_timeout_ms": 500.0,
 	"dropout_z_throttle": -0.6,

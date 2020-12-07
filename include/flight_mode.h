@@ -79,7 +79,10 @@ typedef enum flight_mode_t{
 
 } flight_mode_t;
 
-
+/** This function is balically a list of the enums in 'flight_mode_t'
+* that require Motion Capture (MOCAP) to function properly. 
+*/
+bool mode_needs_mocap(flight_mode_t mode);
 
 
 #endif

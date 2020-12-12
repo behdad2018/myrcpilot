@@ -31,6 +31,7 @@
 #include <rc/encoder.h>
 #include <signal.h>
 #include <xbee_packet_t.h>
+#include <sensor_calc.h>
 
 #define MAX_LOG_FILES	500
 #define BUF_LEN		50

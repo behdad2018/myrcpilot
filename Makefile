@@ -16,7 +16,7 @@ CC		:= gcc
 LINKER		:= gcc
 WFLAGS		:= -Wall -Wextra
 CFLAGS		:= -I $(INCLUDEDIR)
-OPT_FLAGS	:= -O1
+OPT_FLAGS	:= -O1 -march=native -mfloat-abi=hard -mfpu=neon -funsafe-math-optimizations -fopenmp-simd -O3 -ffast-math -ftree-vectorize
 LDFLAGS		:= -lm -lrt -pthread -lrobotcontrol -ljson-c
 
 RM		:= rm -rf

@@ -23,6 +23,7 @@
 #include <xbee_packet_t.h>
 #include <signal.h>
 #include <rc/encoder.h>
+#include <sensor_calc.h>
 
 
 static pthread_t printf_manager_thread;
@@ -86,13 +87,13 @@ static int __print_header()
 		}
 	}
 
-	if(settings.printf_xbee){
- 		printf("%s x_xb | y_xb | z_xb | qx_xb | qy_xb | qz_xb | qw_xb |", __next_colour());
- 	}
+	// if(settings.printf_xbee){
+ // 		printf("%s x_xb | y_xb | z_xb | qx_xb | qy_xb | qz_xb | qw_xb |", __next_colour());
+ // 	}
 
- 	if(settings.printf_rev){
- 		printf("%s rev1 | rev2 | rev3 | rev4 ", __next_colour());
- 	}
+ 	// if(settings.printf_rev){
+ 	// 	printf("%s rev1 | rev2 | rev3 | rev4 ", __next_colour());
+ 	// }
 
 	printf(KNRM);
 	if(settings.printf_mode){
@@ -279,6 +280,9 @@ int print_flight_mode(flight_mode_t mode){
 		return 0;
 	case AUTONOMOUS:
 		printf("%sAUTONOMOUS  %s",KBLU,KNRM);
+		return 0;
+	case SENSEDAUTONOMOUS:
+		printf("%sSENSEDAUTONOMOUS  %s",KBLU,KNRM);
 		return 0;
 	case OPEN_LOOP_DESCENT:
         printf("%sOPN_LOOP_DESCNT%s", KBLU, KNRM);

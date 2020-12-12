@@ -69,6 +69,8 @@ typedef enum flight_mode_t{
 
 	AUTONOMOUS,
 
+	SENSEDAUTONOMOUS,
+
 	/**
      * Commands 0 roll, 0 pitch, and a fixed throttle to hover or slowely descend
      * Useful as an emergency mode if MOCAP drops out for too long

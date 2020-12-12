@@ -264,9 +264,12 @@ static int __parse_flight_mode(json_object* jobj_str, flight_mode_t* mode)
 	else if(strcmp(tmp_str, "POSITION_CONTROL_6DOF")==0){
 		*mode = POSITION_CONTROL_6DOF;
 	}
-	// define autonomous
+	//B: define autonomous
 	else if(strcmp(tmp_str, "AUTONOMOUS")==0){
 		*mode = AUTONOMOUS;
+	}
+	else if(strcmp(tmp_str, "SENSEDAUTONOMOUS")==0){
+		*mode = SENSEDAUTONOMOUS;
 	}
 	else{
 		fprintf(stderr,"ERROR: invalid flight mode\n");

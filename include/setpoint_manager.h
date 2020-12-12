@@ -27,6 +27,10 @@
  */
 typedef struct setpoint_t{
 
+	// B: sensed autonomous setpoints
+	int en_feedfroward;
+	int en_advancedthrustmap;
+
 	/** @name general */
 	///< @{
 	int initialized;	///< set to 1 once setpoint manager has initialized

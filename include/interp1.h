@@ -2,28 +2,28 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
- * File: thrust_initialize.h
+ * File: interp1.h
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 27-Sep-2020 23:59:27
+ * C/C++ source code generated on  : 11-Dec-2020 01:16:32
  */
 
-#ifndef THRUST_INITIALIZE_H
-#define THRUST_INITIALIZE_H
+#ifndef INTERP1_H
+#define INTERP1_H
 
 /* Include Files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
-#include "thrust_types.h"
 
 /* Function Declarations */
-extern void thrust_initialize(void);
+extern void interp1(const float varargin_1[4], const float varargin_2[40], float
+                    varargin_3, float Vq[10]);
 
 #endif
 
 /*
- * File trailer for thrust_initialize.h
+ * File trailer for interp1.h
  *
  * [EOF]
  */

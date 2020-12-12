@@ -2,28 +2,28 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
- * File: thrust_terminate.h
+ * File: feedforward.h
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 27-Sep-2020 23:59:27
+ * C/C++ source code generated on  : 05-Dec-2020 18:33:54
  */
 
-#ifndef THRUST_TERMINATE_H
-#define THRUST_TERMINATE_H
+#ifndef FEEDFORWARD_H
+#define FEEDFORWARD_H
 
 /* Include Files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
-#include "thrust_types.h"
 
 /* Function Declarations */
-extern void thrust_terminate(void);
+extern void feedforward(const float V_rel_B[3], float rho, float
+  *T_ref, float *phi_ref, float *theta_ref);
 
 #endif
 
 /*
- * File trailer for thrust_terminate.h
+ * File trailer for feedforward.h
  *
  * [EOF]
  */

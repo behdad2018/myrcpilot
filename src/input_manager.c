@@ -164,7 +164,7 @@ void new_dsm_data_callback()
 		;
 		double new_kill  = rc_dsm_ch_normalized(settings.dsm_kill_ch)*settings.dsm_kill_pol;
 		// determine the kill state
-		if(new_kill<=0.1){
+		if(new_kill>=0.1){
 			user_input.arm_switch = DISARMED;
 			user_input.requested_arm_mode=DISARMED;
 		}
@@ -201,14 +201,14 @@ void new_dsm_data_callback()
 	case 2:
 		// switch will either range from -1 to 1 or 0 to 1.
 		// in either case it's safe to use +0.5 as the cutoff
-		if(new_mode>0.5) user_input.flight_mode = settings.flight_mode_2;
+		if(new_mode>0.1) user_input.flight_mode = settings.flight_mode_2;
 		else user_input.flight_mode = settings.flight_mode_1;
 		break;
 	case 3:
 		// 3-position switch will have the positions -1, 0, 1 when
 		// calibrated correctly. checking +- 0.5 is a safe cutoff
-		if(new_mode>0.1) user_input.flight_mode = settings.flight_mode_3;
-		else if(new_mode<-0.1) user_input.flight_mode = settings.flight_mode_1;
+		if(new_mode<0.1) user_input.flight_mode = settings.flight_mode_3;
+		else if(new_mode>0.5) user_input.flight_mode = settings.flight_mode_1;
 		else user_input.flight_mode = settings.flight_mode_2;
 		break;
 	default:

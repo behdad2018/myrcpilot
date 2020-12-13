@@ -113,9 +113,9 @@ static void __imu_isr(void)
 	state_estimator_march();
 	XBEE_getData();
 	feedback_march();
-    for(i=1;i<5;i++){
+    /*for(i=1;i<5;i++){
 	state_estimate.rev[i-1] = rc_encoder_read(i);
-	} ;
+	} ;*/
 	if(settings.enable_logging) log_manager_add_new();
 	state_estimator_jobs_after_feedback();
 }
@@ -262,17 +262,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// start barometer, must do before starting state estimator
+	//start barometer, must do before starting state estimator
 	printf("initializing Barometer\n");
 	if(rc_bmp_init(BMP_OVERSAMPLE_16, BMP_FILTER_16)){
 		FAIL("ERROR: failed to initialize barometer\n")
 	}
 
 	//B: initializiation on counter
-	printf("initializing revolution counter\n");
-	if(rc_encoder_init()<0){
-		FAIL("ERROR: failed to initialize encoder\n")
-	}
+	// printf("initializing revolution counter\n");
+	// if(rc_encoder_init()<0){
+	// 	FAIL("ERROR: failed to initialize encoder\n")
+	// }
 
 	// set up state estimator
 	printf("initializing state_estimator\n");

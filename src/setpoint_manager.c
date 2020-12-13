@@ -194,7 +194,7 @@ int setpoint_manager_update(void)
 		break;	
 // B: need to find where we can define feedforward, etc 
 	case SENSEDAUTONOMOUS:
-	    setpoint.en_feedfroward	= 1;
+	    setpoint.en_feedforward	= 1;
 	    setpoint.en_advancedthrustmap= 1;
 		setpoint.en_6dof	= 0;
 		setpoint.en_rpy_ctrl	= 1;

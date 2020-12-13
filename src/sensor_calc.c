@@ -19,8 +19,6 @@
 #include <settings.h>
 
 
-#define SENSOR_CALC_MANAGER_PRI 40
-#define SENSOR_CALC_MANAGER_TOUT 0.5
 int i;
 
 // Definition of our global sensor_calc_msmt variable.

@@ -81,19 +81,18 @@ static int __print_header()
 		printf("%s U0X | U1Y | U2Z | U3r | U4p | U5y |", __next_colour());
 	}
 	if(settings.printf_motors){
-	//	printf("%s", __next_colour());
+		printf("%s", __next_colour());
 		for(i=0;i<settings.num_rotors;i++){
-	//		printf("  M%d |", i+1);
+			printf("  M%d |", i+1);
 		}
 	}
+	if(settings.printf_xbee){
+ 		printf("%s x_xb | y_xb | z_xb | qx_xb | qy_xb | qz_xb | qw_xb |", __next_colour());
+ 	}
 
-	// if(settings.printf_xbee){
- // 		printf("%s x_xb | y_xb | z_xb | qx_xb | qy_xb | qz_xb | qw_xb |", __next_colour());
- // 	}
-
- 	// if(settings.printf_rev){
- 	// 	printf("%s rev1 | rev2 | rev3 | rev4 ", __next_colour());
- 	// }
+ 	if(settings.printf_rev){
+ 		printf("%s rev1 | rev2 | rev3 | rev4 ", __next_colour());
+ 	}
 
 	printf(KNRM);
 	if(settings.printf_mode){
@@ -122,7 +121,7 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 	// print the header
 	__print_header();
 
-	prev_arm_state = fstate.arm_state;
+	//prev_arm_state = fstate.arm_state;
 
 	//sleep so state_estimator can run first
 	rc_usleep(100000);
@@ -145,9 +144,9 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 		}
 		__reset_colour();
 		if(settings.printf_altitude){
-			// printf("%s%+5.2f |%+5.2f |",	__next_colour(),\
-			// 				state_estimate.lidar,\
-			// 				state_estimate.alt_bmp_vel);
+			printf("%s%+5.2f |%+5.2f |",	__next_colour(),\
+							state_estimate.lidar,\
+							state_estimate.alt_bmp_vel);
 			printf("%s%+5.2f|",	__next_colour(),\
 							state_estimate.alt_bmp_vel);
 		}
@@ -192,9 +191,9 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 							fstate.u[5]);
 		}		
 		if(settings.printf_motors){
-		//	printf("%s",__next_colour());
+			printf("%s",__next_colour());
 			for(i=0;i<settings.num_rotors;i++){
-		//		printf("%+5.2f|", fstate.m[i]);
+				printf("%+5.2f|", fstate.m[i]);
 			}
 		}
 		printf(KNRM);
@@ -213,7 +212,7 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 			for(i=0;i<4;i++){
 				printf("%10d|", state_estimate.rev[i]);
 			}
- 		}
+ 	 	}
 
 		if(settings.printf_mode){
 			print_flight_mode(user_input.flight_mode);

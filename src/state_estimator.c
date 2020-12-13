@@ -399,13 +399,13 @@ int state_estimator_march(void)
 		return -1;
 	}
 
-	// populate state_estimate struct one setion at a time, top to bottom
+	//populate state_estimate struct one setion at a time, top to bottom
 	__batt_march();
 	__imu_march();
 	__mag_march();
-	__altitude_march();
+	//__altitude_march();
 	__feedback_select();
-	__mocap_check_timeout();
+	// __mocap_check_timeout();
 	return 0;
 }
 

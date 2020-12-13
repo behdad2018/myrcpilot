@@ -70,14 +70,22 @@ void read_sensor_data() {
 				token = strtok(NULL,s);
 				j=j+1;
 			//printf(" %s\n", token);
+				// wind sensor, RC Pilot and BeagleBone all have different coordinates definitions!
+				// wind sensor need to be in this orieantation so that the following velocities are correct
+				// N of wind sensor point to pos Y axis of BeagleBone which is pos X axis in RC pilot 
+				// In RC pilot nose in pos X, right winf in pos Y and down in pos Z
+				
+				// Vx in wind sensor ~ Vy in RC pilot
 				if (j==4){
-					sensor_calc_msmt.vel[0]=strtod(token, &ptr);
-				}
-				else if (j==6){
 					sensor_calc_msmt.vel[1]=strtod(token, &ptr);
 				}
+				// Vy in wind sensor ~ Vx in RC pilot
+				else if (j==6){
+					sensor_calc_msmt.vel[0]=strtod(token, &ptr);
+				}
+				// Vz in wind sensor ~ -Vz in RC pilot
 				else if (j==8){
-					sensor_calc_msmt.vel[2]=strtod(token, &ptr);
+					sensor_calc_msmt.vel[2]=-strtod(token, &ptr);
 				}
 				else if (j==16){
 					sensor_calc_msmt.rho =strtod(token, &ptr);
@@ -111,9 +119,9 @@ void* sensor_calc_manager(void* ptr) {
 
 	while(rc_get_state()!=EXITING){
 		read_sensor_data();
-		calculate_feedforward();
 		calculate_rpm();
 		calculate_throttle();
+		calculate_feedforward();
 		rc_usleep(100);
 	}
 	close(sensor_calc_msmt.fd);
@@ -125,7 +133,8 @@ void calculate_feedforward(){
 	float phi_ref;
 	float theta_ref;
 	feedforward(sensor_calc_msmt.vel,sensor_calc_msmt.rho,&T_ref,&phi_ref,&theta_ref);
-	sensor_calc_msmt.T_ref = T_ref;
+	sensor_calc_msmt.T_ref = -T_ref;
+	sensor_calc_msmt.normalized_hover_thrust = 0.25 * sensor_calc_msmt.T_ref/sensor_calc_msmt.Tmax;
 	sensor_calc_msmt.phi_ref = phi_ref;
 	sensor_calc_msmt.theta_ref = theta_ref;
 	//printf("T_ref is %lf\n",sensor_calc_msmt.T_ref);

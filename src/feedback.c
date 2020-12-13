@@ -318,7 +318,13 @@ int feedback_march(void)
                     last_en_Z_ctrl = 1;
                 }
                 //B: updating the gains based on battery voltage
-                double hover_throttle= -0.25;
+                if (setpoint.en_feedforward){
+                    double hover_throttle=normalized_hover_thrust
+                }
+                else{
+                    double hover_throttle= -0.25;
+                }
+                
                 D_Z.gain = D_Z_gain_orig * settings.v_nominal/state_estimate.v_batt_lp;
                 //tmp = rc_filter_march(&D_Z, -setpoint.Z+state_estimate.alt_bmp); //altitude is positive but +Z is down
         tmp = rc_filter_march(&D_Z, -setpoint.Z+state_estimate.lidar); //altitude is positive but +Z is down

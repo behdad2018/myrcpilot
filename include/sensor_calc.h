@@ -6,6 +6,7 @@ typedef struct sensor_calc_msmt {
   float rpm[4];
   float rho;
   float T_ref;  // total thrust by 4 rotors to achieve stability
+  float normalized_hover_thrust; // normalized hover thrust
   float Tmax;   // max thrust of a rotor
   float phi_ref;
   float theta_ref;

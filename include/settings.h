@@ -93,6 +93,7 @@ typedef struct settings_t{
 	int printf_xbee;
 	int printf_rev;
 	int printf_counter;
+	int printf_feedforward;
 	///@}
 
 	/** @name log settings */

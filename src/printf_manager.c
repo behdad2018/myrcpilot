@@ -69,7 +69,10 @@ static int __print_header()
 		printf("%s alt(m) |altdot|", __next_colour());
 	}
 	if(settings.printf_rpy){
-		printf("%s roll|pitch| yaw |", __next_colour());
+		printf("%s roll| pitch| yaw|", __next_colour());
+	}
+	if(settings.printf_feedforward){
+		printf("%s T_ref|theta_ref|phi_ref|", __next_colour());
 	}
 	if(settings.printf_sticks){
 		printf("%s  kill  | thr |roll |pitch| yaw |", __next_colour());
@@ -157,6 +160,14 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 							state_estimate.roll,\
 							state_estimate.pitch,\
 							state_estimate.continuous_yaw);
+		}
+		if(settings.printf_feedforward){
+			printf(KCYN);
+			printf("%s%+5.2f|%+5.2f|%+5.2f|",
+							__next_colour(),\
+							sensor_calc_msmt.T_ref,\
+							sensor_calc_msmt.phi_ref,\
+							sensor_calc_msmt.theta_ref);
 		}
 		if(settings.printf_sticks){
 			if(user_input.arm_switch==ARMED) {

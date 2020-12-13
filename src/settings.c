@@ -631,6 +631,7 @@ int settings_load_from_file(char* path)
 	PARSE_BOOL(printf_xbee)
 	PARSE_BOOL(printf_rev)
 	PARSE_BOOL(printf_counter)
+	PARSE_BOOL(printf_feedforward)
 
 
 	// LOGGING

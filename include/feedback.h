@@ -34,9 +34,9 @@ typedef struct feedback_state_t{
 	uint64_t loop_index;	///< increases every time feedback loop runs
 	uint64_t last_step_ns;	///< last time controller has finished a step
 
-	double u[6];		///< siso controller outputs
+	double u[6];		///< siso controller outputs // B: like net thrust, net torque, etc
 	double m[8];		///< signals sent to motors after mapping
-	double mot[8];		///B: normalized thrust
+	double mot[8];		///B: normalized thrust of each motor
 
 }feedback_state_t;
 

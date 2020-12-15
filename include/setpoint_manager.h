@@ -78,6 +78,12 @@ typedef struct setpoint_t{
 	double X;
 	double Y;
 
+	// initial position of the drone
+	double x0;
+	double y0;
+	double z0;
+
+
 	float xTraj[6400], yTraj[6400], zTraj[6400];
 
 } setpoint_t;

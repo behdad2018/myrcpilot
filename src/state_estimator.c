@@ -20,6 +20,7 @@
 #include <rc_pilot_defs.h>
 #include <state_estimator.h>
 #include <settings.h>
+#include <xbee_receive.h>
 
 
 //B: two headers added

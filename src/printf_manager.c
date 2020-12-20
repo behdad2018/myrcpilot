@@ -20,7 +20,8 @@
 #include <settings.h>
 
 //B:
-#include <xbee_packet_t.h>
+//#include <xbee_packet_t.h>
+#include <xbee_receive.h>
 #include <signal.h>
 #include <rc/encoder.h>
 #include <sensor_calc.h>

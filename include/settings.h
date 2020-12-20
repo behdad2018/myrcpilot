@@ -104,6 +104,9 @@ typedef struct settings_t{
 	int log_setpoint;
 	int log_control_u;
 	int log_motor_signals;
+	int log_xbee;
+	int log_flight_mode;
+	int log_benchmark;
 	///@}
 
 	/** @name mavlink stuff */
@@ -125,6 +128,11 @@ typedef struct settings_t{
 	double max_XY_velocity;
 	double max_Z_velocity;
 	///@}
+
+	/** @name serial port the Xbee is connected to */
+    ///@{
+    char xbee_serial_port[50];
+    ///@}
 
 }settings_t;
 

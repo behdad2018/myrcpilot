@@ -15,7 +15,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
-#include "thrust_types.h"
 
 /* Function Declarations */
 extern float b_trapz(const float x[36], const float y[36]);

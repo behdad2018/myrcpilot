@@ -30,7 +30,8 @@
 #include <state_estimator.h>
 #include <rc/encoder.h>
 #include <signal.h>
-#include <xbee_packet_t.h>
+#include <xbee_receive.h>
+//#include <xbee_packet_t.h>
 #include <sensor_calc.h>
 
 #define MAX_LOG_FILES	500
@@ -60,7 +61,7 @@ static int __write_header(FILE* fd)
 	}
 
 	if(settings.log_state){
-		fprintf(fd, ",roll,pitch,yaw,X,Y,Z,Xdot,Ydot,Zdot,xp,yp,zp,xb,yb,zb");
+		fprintf(fd, ",roll,pitch,yaw,X,Y,Z,Xdot,Ydot,Zdot,x0,y0,z0e.xbee_time,xbee_time_received_ns,xbee_x,xbee_y,xbee_z,xbee_qw,xbee_qx,xbee_qy,xbee_qz");
 	}
 
 	if(settings.log_setpoint){
@@ -115,7 +116,7 @@ static int __write_log_entry(FILE* fd, log_entry_t e)
 	}
 
 	if(settings.log_state){
-		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",\
+		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",\
 							e.roll,\
 							e.pitch,\
 							e.yaw,\
@@ -125,13 +126,20 @@ static int __write_log_entry(FILE* fd, log_entry_t e)
 							e.Xdot,\
 							e.Ydot,\
 							e.Zdot,\
-							e.xp,\
-							e.yp,\
-							e.zp,\
-							e.xb,\
-							e.yb,\
-							e.zb);
+							e.x0,\
+							e.y0,\
+							e.z0,\
+							e.xbee_time,\
+							e.xbee_time_received_ns,\
+							e.xbee_x,\
+							e.xbee_y,\
+							e.xbee_z,\
+							e.xbee_qw,\
+							e.xbee_qx,\
+							e.xbee_qy,\
+							e.xbee_qz);
 	}
+
 
 	if(settings.log_setpoint){
 		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",\
@@ -315,13 +323,22 @@ static log_entry_t __construct_new_entry()
 	l.Ydot		= state_estimate.vel_global[1];
 	l.Zdot		= state_estimate.vel_global[2];
 //B:
-	l.xp		= state_estimate.xp;
-	l.yp		= state_estimate.yp;
-	l.zp		= state_estimate.zp;
+	l.x0		= setpoint.x0;
+	l.y0		= setpoint.y0;
+	l.z0		= setpoint.z0;
 
-	l.xb		= xbeeMsg.x;
-	l.yb		= xbeeMsg.y;
-	l.zb		= xbeeMsg.z;
+    l.xbee_time = xbeeMsg.time;
+    l.xbee_time_received_ns = state_estimate.xbee_time_received_ns;
+    l.xbee_x = xbeeMsg.x;
+    l.xbee_y = xbeeMsg.y;
+    l.xbee_z = xbeeMsg.z;
+    l.xbee_qw = xbeeMsg.qw;
+    l.xbee_qx = xbeeMsg.qx;
+    l.xbee_qy = xbeeMsg.qy;
+    l.xbee_qz = xbeeMsg.qz;
+    // l.xbee_roll = xbeeMsg.roll;
+    // l.xbee_pitch = xbeeMsg.pitch;
+    // l.xbee_yaw = xbeeMsg.yaw;
 //
 	l.sp_roll	= setpoint.roll;
 	l.sp_pitch	= setpoint.pitch;

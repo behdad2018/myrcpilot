@@ -29,9 +29,11 @@
 #include <printf_manager.h>
 #include <sensor_calc.h>
 //B:
-#include <xbee_packet_t.h>
+//#include <xbee_packet_t.h>
+#include <xbee_receive.h>
 #include <rc/encoder.h>
 #include <signal.h>
+#include <thrust_map.h>
 
 #define FAIL(str) \
 fprintf(stderr, str); \
@@ -111,7 +113,9 @@ static void __imu_isr(void)
 	//printf("imu interupt...\n");
 	setpoint_manager_update();
 	state_estimator_march();
+
 	XBEE_getData();
+
 	feedback_march();
     /*for(i=1;i<5;i++){
 	state_estimate.rev[i-1] = rc_encoder_read(i);
@@ -274,16 +278,23 @@ int main(int argc, char *argv[])
 	// 	FAIL("ERROR: failed to initialize encoder\n")
 	// }
 
-	// set up state estimator
+	//set up state estimator
 	printf("initializing state_estimator\n");
 	if(state_estimator_init()<0){
 		FAIL("ERROR: failed to init state_estimator")
 	}
- 	// set up XBEE serial link
- 	printf("initializing xbee serial link.\n");
- 	if(XBEE_init()<0){
- 		FAIL("ERROR: failed to init xbee serial link")
- 	}
+ // 	// set up XBEE serial link
+ // 	printf("initializing xbee serial link.\n");
+ // 	if(XBEE_init()<0){
+ // 		FAIL("ERROR: failed to init xbee serial link")
+ // 	}
+
+    printf("initializing xbee serial link:%s.\n", settings.xbee_serial_port);
+    if (XBEE_init(settings.xbee_serial_port) < 0)
+    {
+        FAIL("ERROR: failed to init xbee serial link")
+    }
+
 	// set up feedback controller
 	printf("initializing feedback controller\n");
 	if(feedback_init()<0){

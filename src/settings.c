@@ -638,14 +638,19 @@ int settings_load_from_file(char* path)
 	PARSE_BOOL(enable_logging)
 	PARSE_BOOL(log_sensors)
 	PARSE_BOOL(log_state)
+	PARSE_BOOL(log_xbee)
 	PARSE_BOOL(log_setpoint)
 	PARSE_BOOL(log_control_u)
 	PARSE_BOOL(log_motor_signals)
+	PARSE_BOOL(log_flight_mode)
 
 	// MAVLINK
 	PARSE_STRING(dest_ip)
 	PARSE_INT(my_sys_id)
 	PARSE_INT(mav_port)
+
+	// XBEE SERIAL PORT
+    PARSE_STRING(xbee_serial_port)
 
 	// FEEDBACK CONTROLLERS
 	PARSE_CONTROLLER(roll_controller)

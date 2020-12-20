@@ -54,10 +54,14 @@
 	"log_setpoint": true,
 	"log_control_u": true,
 	"log_motor_signals": true,
+	"log_xbee": true,
+	"log_flight_mode": true,
 
 	"dest_ip": "192.168.8.1",
 	"my_sys_id": 1,
 	"mav_port": 14551,
+
+	"xbee_serial_port": "/dev/ttyO1",
 
 	"roll_controller": {
 		"gain": 1.0,

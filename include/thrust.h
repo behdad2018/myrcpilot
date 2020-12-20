@@ -15,7 +15,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <rtwtypes.h>
-#include <thrust_types.h>
 
 /* Function Declarations */
 extern float thrust(float rpm_low, float rpm_high, float T, float rho, const

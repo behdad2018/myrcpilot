@@ -23,9 +23,11 @@
 #include <settings.h>
 #include <mix.h>
 #include <thrust_map.h>
-#include <xbee_packet_t.h>
+//#include <xbee_packet_t.h>
 #include <trajectory.h>
 #include <trajectory2.h>
+#include <xbee_receive.h>
+#include <circl_traj.h>
 
 #define TWO_PI (M_PI*2.0)
 
@@ -295,11 +297,11 @@ int feedback_march(void)
 				// error definitions for x y z
 				double pos_err_x;
 				double pos_err_y;
-				double pos_err_z;
+				
 
 				pos_err_x = setpoint.X - state_estimate.X ;
 				pos_err_y = setpoint.Y - state_estimate.Y ;
-				pos_err_z = setpoint.Z - state_estimate.Z ;
+				
 
 				float ref_pitch;
 				float ref_roll;
@@ -339,9 +341,11 @@ int feedback_march(void)
 					last_en_Z_ctrl = 1;
 				}
 				//B: using feedforward to find reft thrust which is hover throttle
+				double pos_err_z;
+				pos_err_z = setpoint.Z - state_estimate.Z ;
 				double hover_throttle;
 				if (setpoint.en_feedforward){
-					hover_throttle=normalized_hover_thrust;
+					hover_throttle=sensor_calc_msmt.normalized_hover_thrust;
 				}
 				else{
 					hover_throttle = - 0.6;

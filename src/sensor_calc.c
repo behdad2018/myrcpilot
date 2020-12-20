@@ -103,30 +103,6 @@ void read_sensor_data() {
 	
 }
 
-void* sensor_calc_manager(void* ptr) {
-	sensor_calc_msmt.vel[0] = 0;
-	sensor_calc_msmt.vel[1] = 0;
-	sensor_calc_msmt.vel[2] = 0;
-	sensor_calc_msmt.rho = 1;
-	
-	init_read_from_serial();
-
-	
-	sensor_calc_msmt.initialized = 1;
-
-	printf("Initialized sensor_calc.\n");
-
-
-	while(rc_get_state()!=EXITING){
-		read_sensor_data();
-		calculate_rpm();
-		calculate_throttle();
-		calculate_feedforward();
-		rc_usleep(100);
-	}
-	close(sensor_calc_msmt.fd);
-	return NULL;
-}
 
 void calculate_feedforward(){
 	float T_ref;
@@ -181,6 +157,30 @@ void calculate_throttle(){
 	}
 }
 
+void* sensor_calc_manager(void* ptr) {
+	sensor_calc_msmt.vel[0] = 0;
+	sensor_calc_msmt.vel[1] = 0;
+	sensor_calc_msmt.vel[2] = 0;
+	sensor_calc_msmt.rho = 1;
+	
+	init_read_from_serial();
+
+	
+	sensor_calc_msmt.initialized = 1;
+
+	printf("Initialized sensor_calc.\n");
+
+
+	while(rc_get_state()!=EXITING){
+		read_sensor_data();
+		calculate_rpm();
+		calculate_throttle();
+		calculate_feedforward();
+		rc_usleep(100);
+	}
+	close(sensor_calc_msmt.fd);
+	return NULL;
+}
 
 int sensor_calc_manager_init() {
 	sensor_calc_msmt.initialized = 0;
@@ -213,3 +213,5 @@ int sensor_calc_manager_cleanup() {
 	}
 	return 0;
 }
+
+

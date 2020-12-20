@@ -58,12 +58,31 @@ typedef struct log_entry_t{
 	double	xp;
 	double	yp;
 	double	zp;
+	double	x0;
+	double	y0;
+	double	z0;
 
 	///@}xbee
 
-	double xb;
-	double yb;
-	double zb;
+	// double xb;
+	// double yb;
+	// double zb;
+
+	    /*** @name xbee data */
+    ///@{
+    uint32_t xbee_time;
+    uint64_t xbee_time_received_ns;
+    float xbee_x;
+    float xbee_y;
+    float xbee_z;
+    float xbee_qw;
+    float xbee_qx;
+    float xbee_qy;
+    float xbee_qz;
+    float xbee_roll;
+    float xbee_pitch;
+    float xbee_yaw;
+    ///@}
 
 	///@}
 
@@ -101,6 +120,27 @@ typedef struct log_entry_t{
 	double	mot_7;
 	double	mot_8;
 	///@}
+
+	    /** @name dsm connection valid */
+    ///@{
+    int dsm_con;
+    ///@}
+
+    /** @name flight mode */
+    ///@{
+    int flight_mode;
+    ///@}
+
+    /** @name imu_isr() Benchmarking Timers */
+    ///@{
+    uint64_t tIMU, tIMU_END, tSM, tXBEE, tGPS, tPNI, tNAV, tGUI, tCTR, tLOG, tNTP;
+    ///@}
+
+    /** @name Offset Value (and timestamp of offset value) from NTP Server*/
+    ///@{
+    double ntp_offset_ms;
+    uint64_t ntp_time_updated_ns;
+    ///@}
 
 } log_entry_t;
 

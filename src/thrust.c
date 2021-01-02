@@ -5,7 +5,7 @@
  * File: thrust.c
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 27-Sep-2020 23:59:27
+ * C/C++ source code generated on  : 02-Jan-2021 07:00:08
  */
 
 /* Include Files */
@@ -13,12 +13,11 @@
 #include "trapz.h"
 #include <arm_neon.h>
 #include <math.h>
-#include <string.h>
 
 /* Function Declarations */
 static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
-  float M, const float th[36], const float c[36], const float cla[36], const
-  float r[36], float rpm);
+  float M, const float th[13], const float c[13], const float cla[13], const
+  float r[13], float rpm);
 
 /* Function Definitions */
 
@@ -28,16 +27,16 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
  *                float nb
  *                float rho
  *                float M
- *                const float th[36]
- *                const float c[36]
- *                const float cla[36]
- *                const float r[36]
+ *                const float th[13]
+ *                const float c[13]
+ *                const float cla[13]
+ *                const float r[13]
  *                float rpm
  * Return Type  : float
  */
 static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
-  float M, const float th[36], const float c[36], const float cla[36], const
-  float r[36], float rpm)
+  float M, const float th[13], const float c[13], const float cla[13], const
+  float r[13], float rpm)
 {
   float varargout_1;
   float er1;
@@ -49,32 +48,31 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   float lamb;
   float lambnew;
   float32x4_t b_r;
-  int ibmat;
-  int ibcol;
-  float psi_new[60];
-  float lam[2160];
-  float fcnOutput[60];
   float32x4_t r1;
-  float psi2[2160];
-  int itilerow;
-  float ut[2160];
-  float phi[2160];
-  float b[2160];
-  float sigma[2160];
-  float b_b[2160];
-  float y[2160];
-  float b_fcnOutput[2160];
-  float b_y[2160];
-  float alp[2160];
-  float fv[36];
   float32x4_t r2;
-  float c_r[36];
-  float b_nb[36];
+  int k;
+  int lam_tmp;
+  float psi_new[18];
+  float lam[234];
+  float psi2[234];
   float32x4_t r3;
+  int ibmat;
+  float ut[234];
+  float phi[234];
+  float b[234];
+  float sigma[234];
+  float y[234];
+  float b_y[234];
+  float b_b[234];
+  float fcnOutput[234];
+  float alp[234];
+  float fv[13];
+  float c_r[13];
   float32x4_t r4;
   float32x4_t r5;
   float32x4_t r6;
   float32x4_t r7;
+  float b_nb[13];
   float32x4_t r8;
   float32x4_t r9;
 
@@ -168,61 +166,78 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   /*  constructing inflow ratio based on a linear model */
   /*  lambda is a matrix, rows r, and columns azimuth, (nr * npsi) */
   b_r = vdupq_n_f32(0.0F);
-  for (ibmat = 0; ibmat < 60; ibmat++) {
-    lamb_tot = 0.106494673F * (float)ibmat - er1;
-    psi_new[ibmat] = lamb_tot;
-    fcnOutput[ibmat] = cosf(lamb_tot);
-    for (ibcol = 0; ibcol <= 32; ibcol += 4) {
-      itilerow = ibcol + 36 * ibmat;
-      vst1q_f32(&lam[itilerow], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32
-        (vdupq_n_f32(lambnew), vld1q_f32(&r[ibcol])), vdupq_n_f32
-        (fcnOutput[ibmat]))), vdupq_n_f32(1.0F)));
-      vst1q_f32(&psi2[itilerow], b_r);
-    }
+  r1 = vdupq_n_f32(lambnew);
+  r2 = vdupq_n_f32(1.0F);
+  for (k = 0; k < 18; k++) {
+    lamb_tot = 0.369599134F * (float)k - er1;
+    psi_new[k] = lamb_tot;
+    lamb_tot = cosf(lamb_tot);
+    r3 = vdupq_n_f32(lamb_tot);
+    vst1q_f32(&lam[13 * k], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
+      vld1q_f32(&r[0])), r3)), r2));
+    vst1q_f32(&psi2[13 * k], b_r);
+    lam_tmp = 13 * k + 4;
+    vst1q_f32(&lam[lam_tmp], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
+      vld1q_f32(&r[4])), r3)), r2));
+    vst1q_f32(&psi2[lam_tmp], b_r);
+    lam_tmp = 13 * k + 8;
+    vst1q_f32(&lam[lam_tmp], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
+      vld1q_f32(&r[8])), r3)), r2));
+    vst1q_f32(&psi2[lam_tmp], b_r);
+    lam_tmp = 13 * k + 12;
+    lam[lam_tmp] = lambnew * r[12] * lamb_tot + 1.0F;
+    psi2[lam_tmp] = 0.0F;
   }
 
-  for (ibcol = 0; ibcol <= 2156; ibcol += 4) {
-    b_r = vld1q_f32(&lam[ibcol]);
-    r1 = vld1q_f32(&psi2[ibcol]);
-    vst1q_f32(&lam[ibcol], vmulq_f32(vdupq_n_f32(lamb), vaddq_f32(b_r, r1)));
+  for (lam_tmp = 0; lam_tmp <= 228; lam_tmp += 4) {
+    b_r = vld1q_f32(&lam[lam_tmp]);
+    r1 = vld1q_f32(&psi2[lam_tmp]);
+    vst1q_f32(&lam[lam_tmp], vmulq_f32(vdupq_n_f32(lamb), vaddq_f32(b_r, r1)));
   }
+
+  lam[232] = lamb * (lam[232] + psi2[232]);
+  lam[233] = lamb * (lam[233] + psi2[233]);
 
   /*  intergration to find roll and pitch for a rotor */
   /*  nr*npsi */
-  for (ibcol = 0; ibcol < 60; ibcol++) {
-    ibmat = ibcol * 36;
-    for (itilerow = 0; itilerow < 36; itilerow++) {
-      psi2[ibmat + itilerow] = psi_new[ibcol];
+  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
+    ibmat = lam_tmp * 13;
+    for (k = 0; k < 13; k++) {
+      psi2[ibmat + k] = psi_new[lam_tmp];
     }
   }
 
   /*  nr*npsi */
   /*  the incoming velocity seen by the blade */
   /*  for a quad-copter (no flpapping) */
-  for (ibmat = 0; ibmat < 2160; ibmat++) {
-    psi2[ibmat] = sinf(psi2[ibmat]);
+  for (k = 0; k < 234; k++) {
+    psi2[k] = sinf(psi2[k]);
   }
 
-  for (ibmat = 0; ibmat < 60; ibmat++) {
-    ibcol = ibmat * 36;
-    memcpy(&ut[ibcol], &r[0], 36U * sizeof(float));
+  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
+    ibmat = lam_tmp * 13;
+    for (k = 0; k < 13; k++) {
+      ut[ibmat + k] = r[k];
+    }
   }
 
   /* u = (ut.^2 +up.^2) .^0.5 ; */
   /* usq = (ut.^2 +up.^2);  %u^2 */
   /*  matrix form of the variables */
-  for (ibmat = 0; ibmat < 2160; ibmat++) {
-    lamb_tot = ut[ibmat] + mu * psi2[ibmat];
-    ut[ibmat] = lamb_tot;
-    phi[ibmat] = atanf(lam[ibmat] / lamb_tot);
+  for (k = 0; k < 234; k++) {
+    lamb_tot = ut[k] + mu * psi2[k];
+    ut[k] = lamb_tot;
+    phi[k] = atanf(lam[k] / lamb_tot);
   }
 
   /*  nr*npsi */
   /*  nr*npsi */
   /*  nr*npsi */
-  for (ibmat = 0; ibmat < 60; ibmat++) {
-    ibcol = ibmat * 36;
-    memcpy(&b[ibcol], &th[0], 36U * sizeof(float));
+  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
+    ibmat = lam_tmp * 13;
+    for (k = 0; k < 13; k++) {
+      b[ibmat + k] = th[k];
+    }
   }
 
   /*  based on Beard-McLain book page 47 to model stall condition */
@@ -231,13 +246,13 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   /*  intergral int_0^{2pi} cl * 1/2 * rho * U^2 * c2 / (2pi) */
   /*  l = nb * trapz(psi_new, cl * 0.5 .* rho .* (vt*u).^2 .*c2 , 2) / (2*pi); */
   /*  (1/ 2pi) = 0.1591549 */
-  for (ibmat = 0; ibmat < 2160; ibmat++) {
-    lamb_tot = b[ibmat] - phi[ibmat];
-    b[ibmat] = lamb_tot;
+  for (k = 0; k < 234; k++) {
+    lamb_tot = b[k] - phi[k];
+    b[k] = lamb_tot;
     er1 = expf(M * ((lamb_tot - 0.0349065848F) + 0.35953784F));
     lambnew = expf(-M * ((lamb_tot - 0.0349065848F) - 0.35953784F)) + 1.0F;
     lambnew = (lambnew + er1) / (lambnew * (er1 + 1.0F));
-    sigma[ibmat] = lambnew;
+    sigma[k] = lambnew;
     er1 = lamb_tot - 0.0349065848F;
     if (lamb_tot - 0.0349065848F < 0.0F) {
       er1 = -1.0F;
@@ -247,10 +262,10 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
       }
     }
 
-    b_fcnOutput[ibmat] = er1;
-    psi2[ibmat] = sinf(lamb_tot - 0.0349065848F);
-    alp[ibmat] = cosf(lamb_tot - 0.0349065848F);
-    phi[ibmat] = cosf(phi[ibmat]);
+    fcnOutput[k] = er1;
+    psi2[k] = sinf(lamb_tot - 0.0349065848F);
+    alp[k] = cosf(lamb_tot - 0.0349065848F);
+    phi[k] = cosf(phi[k]);
   }
 
   /*  note that vt wil be cancel out in ct calculations */
@@ -258,51 +273,74 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   /*  Golden search: */
   /* er_ct=abs(ct_two-ct)/ct; */
   /*  use this if used fzero */
-  for (ibmat = 0; ibmat < 60; ibmat++) {
-    ibcol = ibmat * 36;
-    memcpy(&b_b[ibcol], &cla[0], 36U * sizeof(float));
+  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
+    ibmat = lam_tmp * 13;
+    for (k = 0; k < 13; k++) {
+      b_b[ibmat + k] = cla[k];
+    }
   }
 
-  for (ibmat = 0; ibmat <= 2156; ibmat += 4) {
-    b_r = vld1q_f32(&psi2[ibmat]);
-    vst1q_f32(&y[ibmat], vmulq_f32(b_r, b_r));
-    b_r = vld1q_f32(&ut[ibmat]);
-    vst1q_f32(&b_y[ibmat], vmulq_f32(b_r, b_r));
-    b_r = vld1q_f32(&lam[ibmat]);
-    vst1q_f32(&ut[ibmat], vmulq_f32(b_r, b_r));
+  for (k = 0; k <= 228; k += 4) {
+    b_r = vld1q_f32(&psi2[k]);
+    vst1q_f32(&y[k], vmulq_f32(b_r, b_r));
+    b_r = vld1q_f32(&ut[k]);
+    vst1q_f32(&b_y[k], vmulq_f32(b_r, b_r));
+    b_r = vld1q_f32(&lam[k]);
+    vst1q_f32(&ut[k], vmulq_f32(b_r, b_r));
   }
 
-  for (ibmat = 0; ibmat < 60; ibmat++) {
-    ibcol = ibmat * 36;
-    memcpy(&psi2[ibcol], &c[0], 36U * sizeof(float));
+  y[232] = psi2[232] * psi2[232];
+  b_y[232] = ut[232] * ut[232];
+  ut[232] = lam[232] * lam[232];
+  y[233] = psi2[233] * psi2[233];
+  b_y[233] = ut[233] * ut[233];
+  ut[233] = lam[233] * lam[233];
+  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
+    ibmat = lam_tmp * 13;
+    for (k = 0; k < 13; k++) {
+      psi2[ibmat + k] = c[k];
+    }
   }
 
-  for (ibcol = 0; ibcol <= 2156; ibcol += 4) {
-    b_r = vld1q_f32(&sigma[ibcol]);
-    r1 = vld1q_f32(&b_b[ibcol]);
-    r2 = vld1q_f32(&b[ibcol]);
-    r3 = vld1q_f32(&b_fcnOutput[ibcol]);
-    r4 = vld1q_f32(&y[ibcol]);
-    r5 = vld1q_f32(&alp[ibcol]);
-    r6 = vld1q_f32(&b_y[ibcol]);
-    r7 = vld1q_f32(&ut[ibcol]);
-    r8 = vld1q_f32(&psi2[ibcol]);
-    r9 = vld1q_f32(&phi[ibcol]);
-    vst1q_f32(&sigma[ibcol], vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32
+  for (lam_tmp = 0; lam_tmp <= 228; lam_tmp += 4) {
+    b_r = vld1q_f32(&sigma[lam_tmp]);
+    r1 = vld1q_f32(&b_b[lam_tmp]);
+    r2 = vld1q_f32(&b[lam_tmp]);
+    r3 = vld1q_f32(&fcnOutput[lam_tmp]);
+    r4 = vld1q_f32(&y[lam_tmp]);
+    r5 = vld1q_f32(&alp[lam_tmp]);
+    r6 = vld1q_f32(&b_y[lam_tmp]);
+    r7 = vld1q_f32(&ut[lam_tmp]);
+    r8 = vld1q_f32(&psi2[lam_tmp]);
+    r9 = vld1q_f32(&phi[lam_tmp]);
+    vst1q_f32(&sigma[lam_tmp], vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32
       (vmulq_f32(vaddq_f32(vmulq_f32(vsubq_f32(vdupq_n_f32(1.0F), b_r),
       vmulq_f32(r1, r2)), vmulq_f32(b_r, vmulq_f32(vmulq_f32(vmulq_f32
       (vdupq_n_f32(2.0F), r3), r4), r5))), vdupq_n_f32(0.5F)), vdupq_n_f32(rho)),
       vdupq_n_f32(inv_pd_tmp)), vaddq_f32(r6, r7)), r8), r9));
   }
 
+  sigma[232] = ((1.0F - sigma[232]) * (b_b[232] * b[232]) + sigma[232] * (2.0F *
+    fcnOutput[232] * y[232] * alp[232])) * 0.5F * rho * inv_pd_tmp * (b_y[232] +
+    ut[232]) * psi2[232] * phi[232];
+  sigma[233] = ((1.0F - sigma[233]) * (b_b[233] * b[233]) + sigma[233] * (2.0F *
+    fcnOutput[233] * y[233] * alp[233])) * 0.5F * rho * inv_pd_tmp * (b_y[233] +
+    ut[233]) * psi2[233] * phi[233];
   trapz(psi_new, sigma, fv);
-  for (ibcol = 0; ibcol <= 32; ibcol += 4) {
-    vst1q_f32(&c_r[ibcol], vmulq_f32(vld1q_f32(&r[ibcol]), vdupq_n_f32(0.1016F)));
-    b_r = vld1q_f32(&fv[ibcol]);
-    vst1q_f32(&b_nb[ibcol], vmulq_f32(vmulq_f32(vdupq_n_f32(nb), b_r),
-               vdupq_n_f32(0.159154907F)));
-  }
-
+  b_r = vdupq_n_f32(0.1016F);
+  vst1q_f32(&c_r[0], vmulq_f32(vld1q_f32(&r[0]), b_r));
+  r1 = vld1q_f32(&fv[0]);
+  r2 = vdupq_n_f32(nb);
+  r3 = vdupq_n_f32(0.159154907F);
+  vst1q_f32(&b_nb[0], vmulq_f32(vmulq_f32(r2, r1), r3));
+  vst1q_f32(&c_r[4], vmulq_f32(vld1q_f32(&r[4]), b_r));
+  r1 = vld1q_f32(&fv[4]);
+  vst1q_f32(&b_nb[4], vmulq_f32(vmulq_f32(r2, r1), r3));
+  vst1q_f32(&c_r[8], vmulq_f32(vld1q_f32(&r[8]), b_r));
+  r1 = vld1q_f32(&fv[8]);
+  vst1q_f32(&b_nb[8], vmulq_f32(vmulq_f32(r2, r1), r3));
+  c_r[12] = r[12] * 0.1016F;
+  b_nb[12] = nb * fv[12] * 0.159154907F;
   varargout_1 = (b_trapz(c_r, b_nb) * inv_pd - ct) / ct;
 
   /*  blade profile drag */
@@ -339,36 +377,25 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
  *                float T
  *                float rho
  *                const float V_rel_B[3]
- * Return Type  : float
+ *                float *rpm
+ * Return Type  : void
  */
-float thrust(float rpm_low, float rpm_high, float T, float rho, const float
-             V_rel_B[3])
+void thrust(float rpm_low, float rpm_high, float T, float rho, const float
+            V_rel_B[3], float *rpm)
 {
-  float rpm;
   float a;
   int i;
   float fa;
-  static const float fv[36] = { 0.745006561F, 0.730006576F, 0.708706558F,
-    0.683106542F, 0.658606589F, 0.635706544F, 0.605806589F, 0.568206549F,
-    0.534606576F, 0.504806578F, 0.478006601F, 0.454006582F, 0.432306588F,
-    0.412606597F, 0.394706607F, 0.378406584F, 0.363406599F, 0.34970659F,
-    0.337006599F, 0.325206608F, 0.314406604F, 0.30420661F, 0.2948066F,
-    0.2860066F, 0.27780658F, 0.270106584F, 0.262806594F, 0.256006598F,
-    0.24960658F, 0.243506581F, 0.237706587F, 0.232306585F, 0.227106586F,
-    0.222206578F, 0.217906579F, 0.213806584F };
+  static const float fv[13] = { 0.745006561F, 0.683106542F, 0.605806589F,
+    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
+    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F };
 
-  static const float fv1[36] = { 0.0176F, 0.0184F, 0.019F, 0.0196F, 0.0202F,
-    0.0207F, 0.0213F, 0.022F, 0.0224F, 0.0227F, 0.0227F, 0.0225F, 0.0223F,
-    0.022F, 0.0216F, 0.0213F, 0.0208F, 0.0204F, 0.0199F, 0.0193F, 0.0187F,
-    0.0181F, 0.0175F, 0.0168F, 0.0161F, 0.0153F, 0.0145F, 0.0137F, 0.0129F,
-    0.012F, 0.0112F, 0.0103F, 0.0094F, 0.0084F, 0.0071F, 0.004F };
+  static const float fv1[13] = { 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F,
+    0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F };
 
-  float fv2[36];
-  static const float fv3[36] = { 0.1991F, 0.2116F, 0.224F, 0.2364F, 0.2488F,
-    0.2613F, 0.2788F, 0.3033F, 0.328F, 0.3526F, 0.3773F, 0.4019F, 0.4266F,
-    0.4513F, 0.4759F, 0.5006F, 0.5253F, 0.5499F, 0.5746F, 0.5993F, 0.6239F,
-    0.6486F, 0.6733F, 0.6979F, 0.7226F, 0.7472F, 0.7719F, 0.7966F, 0.8213F,
-    0.8459F, 0.8706F, 0.8952F, 0.9199F, 0.9446F, 0.9676F, 0.9901F };
+  float fv2[13];
+  static const float fv3[13] = { 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
+    0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F };
 
   float fb;
   float fc;
@@ -381,6 +408,7 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
   float q;
   float r;
 
+  /*  did this with two outputs so that Codgen makes a pointer type output */
   /*  propeller radius  [m] */
   /*  number of blade */
   /*  rotor disk area */
@@ -396,19 +424,19 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
   /* #codejen */
   /*  Initialization */
   a = rpm_low;
-  rpm = rpm_high;
-  for (i = 0; i < 36; i++) {
+  *rpm = rpm_high;
+  for (i = 0; i < 13; i++) {
     fv2[i] = 5.6548667F;
   }
 
   fa = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, rpm_low);
-  for (i = 0; i < 36; i++) {
+  for (i = 0; i < 13; i++) {
     fv2[i] = 5.6548667F;
   }
 
   fb = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, rpm_high);
   if (fa == 0.0F) {
-    rpm = rpm_low;
+    *rpm = rpm_low;
   } else {
     if (fb != 0.0F) {
       fc = fb;
@@ -418,19 +446,19 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
       e = 0.0F;
       d = 0.0F;
       exitg1 = false;
-      while ((!exitg1) && ((fb != 0.0F) && (a != rpm))) {
+      while ((!exitg1) && ((fb != 0.0F) && (a != *rpm))) {
         /*  Insure that b is the best result so far, a is the previous */
         /*  value of b, and c is on the opposite side of the zero from b. */
         if ((fb > 0.0F) == (fc > 0.0F)) {
           c = a;
           fc = fa;
-          d = rpm - a;
+          d = *rpm - a;
           e = d;
         }
 
         if (fabsf(fc) < fabsf(fb)) {
-          a = rpm;
-          rpm = c;
+          a = *rpm;
+          *rpm = c;
           c = a;
           fa = fb;
           fb = fc;
@@ -438,7 +466,7 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
         }
 
         /*  Convergence test and possible exit */
-        m = 0.5F * (c - rpm);
+        m = 0.5F * (c - *rpm);
 
         /* toler = 2.0*tol*max(abs(b),1.0); */
         if ((fabsf(m) <= 20.0F) || (fb == 0.0F)) {
@@ -460,7 +488,7 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
               /*  Inverse quadratic interpolation */
               q = fa / fc;
               r = fb / fc;
-              fa = s * (2.0F * m * q * (q - r) - (rpm - a) * (r - 1.0F));
+              fa = s * (2.0F * m * q * (q - r) - (*rpm - a) * (r - 1.0F));
               q = (q - 1.0F) * (r - 1.0F) * (s - 1.0F);
             }
 
@@ -483,28 +511,28 @@ float thrust(float rpm_low, float rpm_high, float T, float rho, const float
 
           /*  Interpolation */
           /*  Next point */
-          a = rpm;
+          a = *rpm;
           fa = fb;
           if (fabsf(d) > 20.0F) {
-            rpm += d;
-          } else if (rpm > c) {
-            rpm -= 20.0F;
+            *rpm += d;
+          } else if (*rpm > c) {
+            *rpm -= 20.0F;
           } else {
-            rpm += 20.0F;
+            *rpm += 20.0F;
           }
 
-          for (i = 0; i < 36; i++) {
+          for (i = 0; i < 13; i++) {
             fv2[i] = 5.6548667F;
           }
 
-          fb = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, rpm);
+          fb = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, *rpm);
         }
       }
     }
   }
 
   /*  Main loop */
-  return rpm;
+
 }
 
 /*

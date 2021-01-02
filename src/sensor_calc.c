@@ -17,7 +17,7 @@
 #include <rpmtothrottle.h>
 #include <feedback.h>
 #include <settings.h>
-
+#include <errno.h> 
 
 int i;
 
@@ -30,24 +30,61 @@ static pthread_t sensor_calc_manager_thread;
 float init_read_from_serial()
 {
 
-	char port[20] = "/dev/ttyO5"; /* port to connect to */
-	speed_t baud = B115200; /* baud rate */
-	sensor_calc_msmt.fd = open(port, O_RDWR); /* connect to port */
+//------------------------------- Opening the Serial Port -------------------------------
+    sensor_calc_msmt.fd = open("/dev/ttyO5",O_RDWR | O_NOCTTY);    // ttyUSB0 is the FT232 based USB2SERIAL Converter 
+    if(sensor_calc_msmt.fd == -1)                        // Error Checking 
+    printf("Error while opening the device\n");
+//---------- Setting the Attributes of the serial port using termios structure ---------
+    struct termios SerialPortSettings;  // Create the structure                          
+    tcgetattr(sensor_calc_msmt.fd, &SerialPortSettings); // Get the current attributes of the Serial port
+// Setting the Baud rate
+    cfsetispeed(&SerialPortSettings,B115200); // Set Read  Speed as 19200                       
+                       
 
-	/* set the other settings (in this case, 9600 8N1) */
-	struct termios settings;
-	tcgetattr(sensor_calc_msmt.fd, &settings);
+    SerialPortSettings.c_cflag &= ~PARENB;   // Disables the Parity Enable bit(PARENB),So No Parity   
+    SerialPortSettings.c_cflag &= ~CSTOPB;   // CSTOPB = 2 Stop bits,here it is cleared so 1 Stop bit 
+    SerialPortSettings.c_cflag &= ~CSIZE;    // Clears the mask for setting the data size             
+    SerialPortSettings.c_cflag |=  CS8;      // Set the data bits = 8                                 
+    SerialPortSettings.c_cflag &= ~CRTSCTS;       // No Hardware flow Control                         
+    SerialPortSettings.c_cflag |= CREAD | CLOCAL; // Enable receiver,Ignore Modem Control lines        
+    SerialPortSettings.c_iflag &= ~(IXON | IXOFF | IXANY);  // Disable XON/XOFF flow control both i/p and o/p 
+    SerialPortSettings.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);  // Non Cannonical mode 
+    SerialPortSettings.c_oflag &= ~OPOST;//No Output Processing
+// Setting Time outs 
+    SerialPortSettings.c_cc[VMIN] = 13; // Read at least 10 characters 
+    SerialPortSettings.c_cc[VTIME] = 0; // Wait indefinetly  
 
-	cfsetospeed(&settings, baud); /* baud rate */
-	settings.c_cflag &= ~PARENB; /* no parity */
-	settings.c_cflag &= ~CSTOPB; /* 1 stop bit */
-	settings.c_cflag &= ~CSIZE;
-	settings.c_cflag |= CS8 | CLOCAL; /* 8 bits */
-	settings.c_lflag = ICANON; /* canonical mode */
-	settings.c_oflag &= ~OPOST; /* raw output */
+    if((tcsetattr(sensor_calc_msmt.fd,TCSANOW,&SerialPortSettings)) != 0) // Set the attributes to the termios structure
+    printf("Error while setting attributes \n");
+    //------------------------------- Read data from serial port -----------------------------
 
-	tcsetattr(sensor_calc_msmt.fd, TCSANOW, &settings); /* apply the settings */
-	tcflush(sensor_calc_msmt.fd, TCOFLUSH);
+    tcflush(sensor_calc_msmt.fd, TCIFLUSH);   // Discards old data in the rx buffer   
+
+
+	// old code
+	// char port[20] = "/dev/ttyO5"; /* port to connect to */
+	// speed_t baud = B115200; /* baud rate */
+	// sensor_calc_msmt.fd = open(port, O_RDWR); /* connect to port */
+
+	// if(sensor_calc_msmt.fd== -1)                        /* Error Checking */
+ //               printf("\n  Error! in Opening ttyO5  ");
+ //        else
+ //               printf("\n  ttyO5 Opened Successfully ");      
+
+	// /* set the other settings (in this case, 9600 8N1) */
+	// struct termios settings;
+	// tcgetattr(sensor_calc_msmt.fd, &settings);
+
+	// cfsetospeed(&settings, baud); /* baud rate */
+	// settings.c_cflag &= ~PARENB; /* no parity */
+	// settings.c_cflag &= ~CSTOPB; /* 1 stop bit */
+	// settings.c_cflag &= ~CSIZE;
+	// settings.c_cflag |= CS8; /* 8 bits */
+	// settings.c_lflag = ICANON; /* canonical mode */
+	// settings.c_oflag &= ~OPOST; /* raw output */
+
+	// tcsetattr(sensor_calc_msmt.fd, TCSANOW, &settings); /* apply the settings */
+	// tcflush(sensor_calc_msmt.fd, TCOFLUSH);
 
 }
 
@@ -61,33 +98,35 @@ void read_sensor_data() {
 		i=i+1;
 		char c = 0;
 		bytes_read = read(sensor_calc_msmt.fd, &c, 1);
+		//printf("%c",c);
 		array[i]=c;
 		if (c == '\n') {
 			const char s[] = " ";
 			char* token = strtok(array,s);
 			int j = -1;
-			while (token != NULL) {
+			while (token != NULL && j<17) {
 				token = strtok(NULL,s);
 				j=j+1;
 			//printf(" %s\n", token);
 				// wind sensor, RC Pilot and BeagleBone all have different coordinates definitions!
 				// wind sensor need to be in this orieantation so that the following velocities are correct
 				// N of wind sensor point to pos Y axis of BeagleBone which is pos X axis in RC pilot 
-				// In RC pilot nose in pos X, right winf in pos Y and down in pos Z
+				// In RC pilot nose in pos X, right wing in pos Y and down in pos Z
 				
 				// Vx in wind sensor ~ Vy in RC pilot
 				if (j==4){
-					sensor_calc_msmt.vel[1]=strtod(token, &ptr);
+					sensor_calc_msmt.vel[1]=strtod(token, &ptr)+ 0.001F;
 				}
 				// Vy in wind sensor ~ Vx in RC pilot
 				else if (j==6){
-					sensor_calc_msmt.vel[0]=strtod(token, &ptr);
+					sensor_calc_msmt.vel[0]=strtod(token, &ptr)+ 0.001F;
 				}
 				// Vz in wind sensor ~ -Vz in RC pilot
 				else if (j==8){
-					sensor_calc_msmt.vel[2]=-strtod(token, &ptr);
+					sensor_calc_msmt.vel[2]=-strtod(token, &ptr)+ 0.001F;
 				}
-				else if (j==16){
+				// we want to only read the density at first. why? because sometimes density is retruned zero by the sensor.
+				else if (j==16 && sensor_calc_msmt.rho==1.0F){
 					sensor_calc_msmt.rho =strtod(token, &ptr);
 				}
 			}
@@ -95,12 +134,10 @@ void read_sensor_data() {
 			break;
 		}
 	}
-	
-	//printf("%c",array);
+	// printf("%c",array);
 	// printf("%lf\n",sensor_calc_msmt.vel[0]); 
 	// printf("%lf\n",sensor_calc_msmt.vel[1]); 
 	// printf("%lf\n",sensor_calc_msmt.vel[2]);
-	
 }
 
 
@@ -125,55 +162,64 @@ void calculate_rpm() {
 	 // finding maxim thrust
 	float ignore;
 	float Tmax;
+	float rpm;
 	// RPM value for max thrust does not matter let's say 4000 rpm 
 	rpmtothrottle(4000.F,sensor_calc_msmt.vel,&ignore,&Tmax);
-	sensor_calc_msmt.Tmax=Tmax;
+	sensor_calc_msmt.Tmax=Tmax+00000.1F;
     //printf("max thrust is %lf\n",sensor_calc_msmt.Tmax);
+    //printf("tmax is %lf\n",sensor_calc_msmt.Tmax);
+    //printf("thrust is %lf\n",fstate.mot[0]*sensor_calc_msmt.Tmax);
 	for(i=0;i<settings.num_rotors;i++){
 		
-		sensor_calc_msmt.rpm[i] = thrust(100.F,12000.F,fstate.mot[i]*sensor_calc_msmt.Tmax,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
 		
-		if (sensor_calc_msmt.rpm[i] > 0) { // If rpm has already been calculated once.
-			lb[i] = sensor_calc_msmt.rpm[i] - 500;
-			ub[i] = sensor_calc_msmt.rpm[i] + 500;
-			if (lb[i] < 0) {
-				lb[i]=100;
-			}
-		}
-		sensor_calc_msmt.rpm[i] = thrust(lb[i],ub[i],fstate.mot[i]*sensor_calc_msmt.Tmax,sensor_calc_msmt.rho,sensor_calc_msmt.vel);
-		//printf("RPM is %lf\n",sensor_calc_msmt.rpm[i]);
+		// if (sensor_calc_msmt.rpm[i] > 0) { // If rpm has already been calculated once.
+		// 	lb[i] = sensor_calc_msmt.rpm[i] - 500;
+		// 	ub[i] = sensor_calc_msmt.rpm[i] + 500;
+		// 	if (lb[i] < 0) {
+		// 		lb[i]=100;
+		// 	}
+		// }
+		
+		thrust(lb[i],ub[i],fstate.mot[i]*sensor_calc_msmt.Tmax,sensor_calc_msmt.rho,sensor_calc_msmt.vel,&rpm);
+		sensor_calc_msmt.rpm[i]=rpm;
+		//fstate.mot[i]*sensor_calc_msmt.Tmax
+		//printf("input thrust is %lf\n",fstate.mot[i]*sensor_calc_msmt.Tmax);
+		// printf("RPM is %lf\n",sensor_calc_msmt.rpm[i]);
+		// printf("rho is %lf\n",sensor_calc_msmt.rho);
+		// printf("v is %lf\n",sensor_calc_msmt.vel[1]);
 	}
 }
 
 void calculate_throttle(){
-	float throttle[4];
+	float throttle;
 	float ignore2;
+	//printf("RPM is %lf\n",sensor_calc_msmt.rpm[0]);
 	for(i=0;i<settings.num_rotors;i++){
-
-		rpmtothrottle(sensor_calc_msmt.rpm[i],sensor_calc_msmt.vel,&throttle[i],&ignore2);
-		sensor_calc_msmt.throttle[i] = throttle[i];
+		
+		rpmtothrottle(sensor_calc_msmt.rpm[i],sensor_calc_msmt.vel,&throttle,&ignore2);
+		sensor_calc_msmt.throttle[i] = throttle;
 
 		//printf("throttle is %lf\n",sensor_calc_msmt.throttle[i]);
 	}
 }
 
 void* sensor_calc_manager(void* ptr) {
-	sensor_calc_msmt.vel[0] = 0;
-	sensor_calc_msmt.vel[1] = 0;
-	sensor_calc_msmt.vel[2] = 0;
-	sensor_calc_msmt.rho = 1;
+	sensor_calc_msmt.vel[0] = 0.0F;
+	sensor_calc_msmt.vel[1] = 0.0F;
+	sensor_calc_msmt.vel[2] = 0.0F;
+	sensor_calc_msmt.rho = 1.0F;
 	
 	init_read_from_serial();
 
 	
 	sensor_calc_msmt.initialized = 1;
 
-	printf("Initialized sensor_calc.\n");
+//	printf("Initialized sensor_calc.\n");
 
 
 	while(rc_get_state()!=EXITING){
 		read_sensor_data();
-		calculate_rpm();
+	    calculate_rpm();
 		calculate_throttle();
 		calculate_feedforward();
 		rc_usleep(100);
@@ -190,7 +236,6 @@ int sensor_calc_manager_init() {
 		fprintf(stderr, "ERROR in sensor_calc_manager_init, failed to start thread\n");
 	return -1;
 }
-
 		// wait for thread to start
 for(int i=0;i<50;i++){
 	if(sensor_calc_msmt.initialized) return 0;

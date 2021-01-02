@@ -234,7 +234,7 @@ int feedback_march(void)
 
 	// We are about to start marching the individual SISO controllers forward.
 	// Start by zeroing out the motors signals then add from there.
-	for(i=0;i<8;i++) mot[i] = 0.0;
+	for(i=0;i<8;i++) fstate.mot[i] = 0.0;
 		for(i=0;i<6;i++) u[i] = 0.0;
 
 
@@ -288,6 +288,11 @@ int feedback_march(void)
 				setpoint.Y=y;
 				setpoint.Z=z;
 
+				// hover condition
+				setpoint.X=setpoint.x0;
+				setpoint.Y=setpoint.y0;
+				setpoint.Z=setpoint.z0;
+
 				// current states
 				state_estimate.X=xbeeMsg.x;
 				state_estimate.Y=xbeeMsg.y;
@@ -340,7 +345,7 @@ int feedback_march(void)
 					rc_filter_prefill_outputs(&D_Z, tmp);
 					last_en_Z_ctrl = 1;
 				}
-				//B: using feedforward to find reft thrust which is hover throttle
+				//B: using feedforward to find ref thrust which is hover throttle
 				double pos_err_z;
 				pos_err_z = setpoint.Z - state_estimate.Z ;
 				double hover_throttle;
@@ -359,7 +364,7 @@ int feedback_march(void)
 
 		u[VEC_Z] =  hover_throttle + tmp / (cos(state_estimate.roll)*cos(state_estimate.pitch));
 		rc_saturate_double(&u[VEC_Z], MIN_THRUST_COMPONENT, MAX_THRUST_COMPONENT);
-		mix_add_input(u[VEC_Z], VEC_Z, mot);
+		mix_add_input(u[VEC_Z], VEC_Z, fstate.mot);
 		last_en_Z_ctrl = 1;
 	}
 	// else use direct throttle
@@ -370,7 +375,7 @@ int feedback_march(void)
 		//printf("throttle: %f\n",tmp);
 		rc_saturate_double(&tmp, MIN_THRUST_COMPONENT, MAX_THRUST_COMPONENT);
 		u[VEC_Z] = tmp;
-		mix_add_input(u[VEC_Z], VEC_Z, mot);
+		mix_add_input(u[VEC_Z], VEC_Z, fstate.mot);
 		//B:
 		//setpoint.yaw = 0;
 	}
@@ -383,93 +388,93 @@ int feedback_march(void)
 
 	if(setpoint.en_rpy_ctrl){
 		// Roll
-		mix_check_saturation(VEC_ROLL, mot, &min, &max);
+		mix_check_saturation(VEC_ROLL, fstate.mot, &min, &max);
 		if(max>MAX_ROLL_COMPONENT)  max =  MAX_ROLL_COMPONENT;
 		if(min<-MAX_ROLL_COMPONENT) min = -MAX_ROLL_COMPONENT;
 		rc_filter_enable_saturation(&D_roll, min, max);
 		D_roll.gain = D_roll_gain_orig * settings.v_nominal/state_estimate.v_batt_lp;
 		 // B: rc_filter_march is PID controller
 		u[VEC_ROLL] = rc_filter_march(&D_roll, setpoint.roll - state_estimate.roll);
-		mix_add_input(u[VEC_ROLL], VEC_ROLL, mot);
+		mix_add_input(u[VEC_ROLL], VEC_ROLL, fstate.mot);
 
 		// pitch
-		mix_check_saturation(VEC_PITCH, mot, &min, &max);
+		mix_check_saturation(VEC_PITCH, fstate.mot, &min, &max);
 		if(max>MAX_PITCH_COMPONENT)  max =  MAX_PITCH_COMPONENT;
 		if(min<-MAX_PITCH_COMPONENT) min = -MAX_PITCH_COMPONENT;
 		rc_filter_enable_saturation(&D_pitch, min, max);
 		D_pitch.gain = D_pitch_gain_orig * settings.v_nominal/state_estimate.v_batt_lp;
 		u[VEC_PITCH] = rc_filter_march(&D_pitch, setpoint.pitch - state_estimate.pitch);
-		mix_add_input(u[VEC_PITCH], VEC_PITCH, mot);
+		mix_add_input(u[VEC_PITCH], VEC_PITCH, fstate.mot);
 
 		// Yaw
 		// if throttle stick is down (waiting to take off) keep yaw setpoint at
 		// current heading, otherwide update by yaw rate
-		mix_check_saturation(VEC_YAW, mot, &min, &max);
+		mix_check_saturation(VEC_YAW, fstate.mot, &min, &max);
 		if(max>MAX_YAW_COMPONENT)  max =  MAX_YAW_COMPONENT;
 		if(min<-MAX_YAW_COMPONENT) min = -MAX_YAW_COMPONENT;
 		rc_filter_enable_saturation(&D_yaw, min, max);
 		D_yaw.gain = D_yaw_gain_orig * settings.v_nominal/state_estimate.v_batt_lp;
 		u[VEC_YAW] = rc_filter_march(&D_yaw, setpoint.yaw - state_estimate.yaw);
-		mix_add_input(u[VEC_YAW], VEC_YAW, mot);
+		mix_add_input(u[VEC_YAW], VEC_YAW, fstate.mot);
 	}
 	// otherwise direct throttle to roll pitch yaw
 	else{
 		// roll
-		mix_check_saturation(VEC_ROLL, mot, &min, &max);
+		mix_check_saturation(VEC_ROLL, fstate.mot, &min, &max);
 		if(max>MAX_ROLL_COMPONENT)  max =  MAX_ROLL_COMPONENT;
 		if(min<-MAX_ROLL_COMPONENT) min = -MAX_ROLL_COMPONENT;
 		u[VEC_ROLL] = setpoint.roll_throttle;
 		rc_saturate_double(&u[VEC_ROLL], min, max);
-		mix_add_input(u[VEC_ROLL], VEC_ROLL, mot);
+		mix_add_input(u[VEC_ROLL], VEC_ROLL, fstate.mot);
 
 		// pitch
-		mix_check_saturation(VEC_PITCH, mot, &min, &max);
+		mix_check_saturation(VEC_PITCH, fstate.mot, &min, &max);
 		if(max>MAX_PITCH_COMPONENT)  max =  MAX_PITCH_COMPONENT;
 		if(min<-MAX_PITCH_COMPONENT) min = -MAX_PITCH_COMPONENT;
 		u[VEC_PITCH] = setpoint.pitch_throttle;
 		rc_saturate_double(&u[VEC_PITCH], min, max);
-		mix_add_input(u[VEC_PITCH], VEC_PITCH, mot);
+		mix_add_input(u[VEC_PITCH], VEC_PITCH, fstate.mot);
 
 		// YAW
-		mix_check_saturation(VEC_YAW, mot, &min, &max);
+		mix_check_saturation(VEC_YAW, fstate.mot, &min, &max);
 		if(max>MAX_YAW_COMPONENT)  max =  MAX_YAW_COMPONENT;
 		if(min<-MAX_YAW_COMPONENT) min = -MAX_YAW_COMPONENT;
 		u[VEC_YAW] = setpoint.yaw_throttle;
 		rc_saturate_double(&u[VEC_YAW], min, max);
-		mix_add_input(u[VEC_YAW], VEC_YAW, mot);
+		mix_add_input(u[VEC_YAW], VEC_YAW, fstate.mot);
 	}
 
 	// for 6dof systems, add X and Y
 	if(setpoint.en_6dof){
 		// X
-		mix_check_saturation(VEC_X, mot, &min, &max);
+		mix_check_saturation(VEC_X, fstate.mot, &min, &max);
 		if(max>MAX_X_COMPONENT)  max =  MAX_X_COMPONENT;
 		if(min<-MAX_X_COMPONENT) min = -MAX_X_COMPONENT;
 		u[VEC_X] = setpoint.X_throttle;
 		rc_saturate_double(&u[VEC_X], min, max);
-		mix_add_input(u[VEC_X], VEC_X, mot);
+		mix_add_input(u[VEC_X], VEC_X, fstate.mot);
 
 		// Y
-		mix_check_saturation(VEC_Y, mot, &min, &max);
+		mix_check_saturation(VEC_Y, fstate.mot, &min, &max);
 		if(max>MAX_Y_COMPONENT)  max =  MAX_Y_COMPONENT;
 		if(min<-MAX_Y_COMPONENT) min = -MAX_Y_COMPONENT;
 		u[VEC_Y] = setpoint.Y_throttle;
 		rc_saturate_double(&u[VEC_Y], min, max);
-		mix_add_input(u[VEC_Y], VEC_Y, mot);
+		mix_add_input(u[VEC_Y], VEC_Y, fstate.mot);
 	}
 
 	/***************************************************************************
 	* Send ESC motor signals immediately at the end of the control loop
 	***************************************************************************/
 	for(i=0;i<settings.num_rotors;i++){
-		rc_saturate_double(&mot[i], 0.0, 1.0);
+		rc_saturate_double(&fstate.mot[i], 0.0, 1.0);
 
-		// using Hbem model or simple table lookup
+		// deciding using HBEM model or simple table lookup
 		if (setpoint.en_advancedthrustmap){
 			fstate.m[i] = sensor_calc_msmt.throttle[i];
 		}
 		else{
-			fstate.m[i] = map_motor_signal(mot[i]);
+			fstate.m[i] = map_motor_signal(fstate.mot[i]);
 		}
 
 		// NO NO NO this undoes all the fancy mixing-based saturation

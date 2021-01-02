@@ -66,6 +66,9 @@ static int __print_header()
 	if(settings.printf_arm){
 		printf("  arm   |");
 	}
+	if(1){
+		printf("%s battery%|",__next_colour());
+	}
 	if(settings.printf_altitude){
 		printf("%s alt(m) |altdot|", __next_colour());
 	}
@@ -137,6 +140,7 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 		//}
 
 		printf("\r");
+
 		if(settings.printf_arm){
 			if(fstate.arm_state==ARMED) {
 				printf("%s ARMED %s |", KRED, KNRM);
@@ -147,6 +151,9 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 			}
 		}
 		__reset_colour();
+			printf("%s%+5.2f  |",__next_colour(),\
+			state_estimate.v_batt_lp);
+
 		if(settings.printf_altitude){
 			printf("%s%+5.2f |%+5.2f |",	__next_colour(),\
 							state_estimate.lidar,\
@@ -163,12 +170,12 @@ static void* __printf_manager_func(__attribute__ ((unused)) void* ptr)
 							state_estimate.continuous_yaw);
 		}
 		if(settings.printf_feedforward){
-			printf(KCYN);
-			printf("%s%+5.2f|%+5.2f|%+5.2f|",
+			//printf(KCYN);
+			printf(" %s%+5.2f  | %+5.2f  | %+5.2f|",
 							__next_colour(),\
 							sensor_calc_msmt.T_ref,\
-							sensor_calc_msmt.phi_ref,\
-							sensor_calc_msmt.theta_ref);
+							sensor_calc_msmt.theta_ref,\
+							sensor_calc_msmt.phi_ref);
 		}
 		if(settings.printf_sticks){
 			if(user_input.arm_switch==ARMED) {

@@ -33,6 +33,8 @@
 #include <xbee_receive.h>
 //#include <xbee_packet_t.h>
 #include <sensor_calc.h>
+#include <input_manager.h>
+#include <setpoint_manager.h>
 
 #define MAX_LOG_FILES	500
 #define BUF_LEN		50
@@ -54,14 +56,14 @@ static int logging_enabled; // set to 0 to exit the write_thread
 static int __write_header(FILE* fd)
 {
 	// always print loop index
-	fprintf(fd, "loop_index, counter, last_step_ns, rev1, rev2, rev3, rev4");
+	fprintf(fd, "loop_index, counter, last_step_ns, T_ref, theta_ref, phi_ref, uwind, vwind, wwind, rho, rpm1, rpm2, rpm3, rpm4");
 
 	if(settings.log_sensors){
 		fprintf(fd, ",v_batt,alt,gyro_roll,gyro_pitch,gyro_yaw,accel_X,accel_Y,accel_Z");
 	}
 
 	if(settings.log_state){
-		fprintf(fd, ",roll,pitch,yaw,X,Y,Z,Xdot,Ydot,Zdot,x0,y0,z0e.xbee_time,xbee_time_received_ns,xbee_x,xbee_y,xbee_z,xbee_qw,xbee_qx,xbee_qy,xbee_qz");
+		fprintf(fd, ",roll,pitch,yaw,X,Y,Z,Xdot,Ydot,Zdot,x0,y0,z0,e.xbee_time,xbee_time_received_ns,xbee_x,xbee_y,xbee_z,xbee_qw,xbee_qx,xbee_qy,xbee_qz");
 	}
 
 	if(settings.log_setpoint){
@@ -81,7 +83,9 @@ static int __write_header(FILE* fd)
 	if(settings.log_motor_signals && settings.num_rotors==4){
 		fprintf(fd, ",mot_1,mot_2,mot_3,mot_4");
 	}
-
+	if(settings.log_flight_mode){
+		fprintf(fd,",flight_mode");
+	}
 	fprintf(fd, "\n");
 	return 0;
 
@@ -94,14 +98,23 @@ static int __write_log_entry(FILE* fd, log_entry_t e)
 	// always print loop index
 	// B: PRId64 for things who can be negative or positive
 	// B: PRIu64 can only be positive
-	fprintf(fd, "%" PRIu64 ",%" PRId64 ",%" PRIu64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64, \
+	fprintf(fd, "%" PRIu64 ",%" PRId64 ",%" PRIu64, \
 							e.loop_index,\
 							e.counter,\
-							e.last_step_ns,\
-							e.rev1,\
-							e.rev2,\
-							e.rev3,\
-							e.rev4);
+							e.last_step_ns);
+
+	fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",\
+							e.T_ref,\
+							e.phi_ref,\
+							e.theta_ref,\
+							e.uwind,\
+							e.vwind,\
+							e.wwind,\
+							e.rho,\
+							e.rpm1,\
+							e.rpm2,\
+							e.rpm3,\
+							e.rpm4);
 
 	if(settings.log_sensors){
 		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",\
@@ -187,6 +200,37 @@ static int __write_log_entry(FILE* fd, log_entry_t e)
 							e.mot_2,\
 							e.mot_3,\
 							e.mot_4);
+	}
+	if(settings.log_flight_mode){
+
+	// B: The flight modes I often use
+	switch(user_input.flight_mode){
+		case DIRECT_THROTTLE_4DOF:
+			fprintf(fd,",%d",1);
+			//fprintf(fd,",DIR_THRTLE_4DOF");
+			break;
+		case ALT_HOLD_4DOF:
+			fprintf(fd,",%d",2);
+			//printf(fd,",ALT_HOLD_4DOF");
+			break;
+		case AUTONOMOUS:
+			fprintf(fd,",%d",3);
+			//fprintf(fd,",AUTONOMOUS");
+			break;
+		case SENSEDAUTONOMOUS:
+			fprintf(fd,",%d",4);
+			//fprintf(fd,",SENSEDAUTONOMOUS");
+			break;
+		case OPEN_LOOP_DESCENT:
+			fprintf(fd,",%d",5);
+        	//fprintf(fd,",OPN_LOOP_DESCNT");
+        	break;
+		//default:
+		//	fprintf(fd,",ERROR in print_flight_mode unknown flight mode");
+		//	break;
+	}
+		//fprintf(fd, "%s", user_input.flight_mode ? "ALT_HOLD_4DOF" : "AUTONOMOUS" : "SENSEDAUTONOMOUS");
+		//fprintf(fd, ",%c",user_input.flight_mode);
 	}
 
 	fprintf(fd, "\n");
@@ -299,11 +343,24 @@ static log_entry_t __construct_new_entry()
 //
 	l.last_step_ns	= fstate.last_step_ns;
 //B 
-	l.rev1		= state_estimate.rev[0];
-	l.rev2		= state_estimate.rev[1];
-	l.rev3		= state_estimate.rev[2];
-	l.rev4		= state_estimate.rev[3];
-//
+	// l.rev1		= state_estimate.rev[0];
+	// l.rev2		= state_estimate.rev[1];
+	// l.rev3		= state_estimate.rev[2];
+	// l.rev4		= state_estimate.rev[3];
+
+	l.T_ref=sensor_calc_msmt.T_ref;
+	l.phi_ref=sensor_calc_msmt.phi_ref;
+	l.theta_ref=sensor_calc_msmt.theta_ref;
+	l.uwind=sensor_calc_msmt.vel[0];
+	l.vwind=sensor_calc_msmt.vel[1];
+	l.wwind=sensor_calc_msmt.vel[2];
+	l.rho=sensor_calc_msmt.rho;
+	l.rpm1=sensor_calc_msmt.rpm[0];
+	l.rpm2=sensor_calc_msmt.rpm[1];
+	l.rpm3=sensor_calc_msmt.rpm[2];
+	l.rpm4=sensor_calc_msmt.rpm[3];
+
+
 	l.v_batt	= state_estimate.v_batt_lp;
 	l.alt	= state_estimate.lidar;
 	l.gyro_roll	= state_estimate.gyro[0];

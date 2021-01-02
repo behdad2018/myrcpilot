@@ -51,8 +51,8 @@ int serial_open(const char *port, int baud, int blocking)
         return -1;
     }
 
-    cfsetispeed(&opts, serial_translate_baud(9600));
-    cfsetospeed(&opts, serial_translate_baud(9600));
+    cfsetispeed(&opts, serial_translate_baud(57600));
+    cfsetospeed(&opts, serial_translate_baud(57600));
 
     cfmakeraw(&opts);
 

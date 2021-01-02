@@ -17,8 +17,8 @@
 #include <rtwtypes.h>
 
 /* Function Declarations */
-extern float thrust(float rpm_low, float rpm_high, float T, float rho, const
-                    float V_rel_B[3]);
+extern void thrust(float rpm_low, float rpm_high, float T, float rho, const
+                    float V_rel_B[3], float *rpm);
 
 #endif
 

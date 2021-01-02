@@ -244,12 +244,6 @@ int main(int argc, char *argv[])
 	if(input_manager_init()<0){
 		FAIL("ERROR: failed to initialize input_manager\n")
 	}
-	//B:
-    printf("initializing sensor_calc_manager\n");
-    if (sensor_calc_manager_init() < 0) {
-        FAIL("ERROR: failed to initialize sensor_calc_manager\n");
-    }
-
 	// initialize buttons and Assign functions to be called when button
 	// events occur
 	if(rc_button_init(RC_BTN_PIN_PAUSE, RC_BTN_POLARITY_NORM_HIGH,
@@ -260,7 +254,7 @@ int main(int argc, char *argv[])
 
 	// initialize log_manager if enabled in settings
 	if(settings.enable_logging){
-		printf("initializing log manager");
+		printf("initializing log manager\n");
 		if(log_manager_init()<0){
 			FAIL("ERROR: failed to initialize log manager\n")
 		}
@@ -322,13 +316,19 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	//B:
+    printf("initializing sensor_calc_manager\n");
+    if (sensor_calc_manager_init() < 0) {
+        FAIL("ERROR: failed to initialize sensor_calc_manager\n");
+    }
 	// final setup
 	if(rc_make_pid_file()!=0){
 		FAIL("ERROR: failed to make a PID file\n")
 	}
-
+	
 	// make sure everything is disarmed them start the ISR
 	feedback_disarm();
+
 	printf("waiting for dmp to settle...\n");
 	fflush(stdout);
 	rc_usleep(3000000);

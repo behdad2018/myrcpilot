@@ -25,10 +25,22 @@ typedef struct log_entry_t{
 	int64_t counter;
 	uint64_t last_step_ns;
 	// B rev counter of the four motors  
-	int64_t rev1;
-	int64_t rev2;
-	int64_t rev3;
-	int64_t rev4;
+	// int64_t rev1;
+	// int64_t rev2;
+	// int64_t rev3;
+	// int64_t rev4;
+
+	float T_ref;
+	float phi_ref;
+	float theta_ref;
+	float uwind;
+	float vwind;
+	float wwind;
+	float rho;
+	float rpm1;
+	float rpm2;
+	float rpm3;
+	float rpm4;
 
 	///@}
 

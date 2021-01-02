@@ -5,6 +5,7 @@
 
 // thread speeds, prioritites, and close timeouts
 #define SENSOR_CALC_MANAGER_PRI 40
+#define SENSOR_CALC_MANAGER_HZ 40
 #define SENSOR_CALC_MANAGER_TOUT 0.5
 #define INPUT_MANAGER_HZ	20
 #define INPUT_MANAGER_PRI	80

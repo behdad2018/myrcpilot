@@ -5,7 +5,7 @@
  * File: rpmtothrottle.c
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 11-Dec-2020 01:16:32
+ * C/C++ source code generated on  : 03-Jan-2021 21:55:02
  */
 
 /* Include Files */
@@ -27,9 +27,7 @@
 void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
                    *Tmax)
 {
-  float b_y1;
-  float mu;
-  float lamb;
+  float Vinf;
   float alpha;
   int mid_i;
   float data[360];
@@ -104,11 +102,13 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
   float fcnOutput[360];
   signed char varargin_1[10];
   int j;
+  float r;
   float data2[9];
   float y[9];
   static const float fv10[9] = { 0.0F, 0.2F, 0.3F, 0.4F, 0.5F, 0.599999964F,
     0.7F, 0.799999952F, 0.9F };
 
+  float b_y1;
   float fv11[4];
   static const float fv12[40] = { 4.4786F, 3.7369F, 2.8859F, 1.9703F, 4.4786F,
     3.7203F, 2.9335F, 1.9468F, 4.4786F, 3.7376F, 3.0585F, 2.0665F, 4.4786F,
@@ -121,26 +121,19 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
   float varargin_2[10];
 
   /*  relative incoming velocity */
-  /*  propeller radius  [m] */
   /*  wind tunnel speeds */
   /*  throttle_values */
-  /*  rad per second */
-  b_y1 = rpm * 0.104719698F * 0.1016F;
-
-  /*  tip velocity */
-  mu = sqrtf(V_rel_B[0] * V_rel_B[0] + V_rel_B[1] * V_rel_B[1]) / (b_y1 +
-    0.0001F);
-
-  /*  advance ratio */
-  lamb = V_rel_B[2] / (b_y1 + 0.0001F);
-
-  /*  total external inflow ratio (effect lamb_c ans mu * tan alpha) */
-  if (lamb < 0.0F) {
-    lamb = 0.0F;
+  Vinf = sqrtf((V_rel_B[0] * V_rel_B[0] + V_rel_B[1] * V_rel_B[1]) + V_rel_B[2] *
+               V_rel_B[2]);
+  alpha = 57.2957802F * atanf(V_rel_B[2] / (Vinf + 1.0E-5F));
+  if (V_rel_B[2] < 0.0F) {
+    alpha = 0.0F;
   }
 
-  alpha = 57.2957802F * atanf(1.0F / (mu / (lamb + 0.0001F)));
-  lamb = sqrtf(mu * mu + lamb * lamb) * (b_y1 + 0.0001F);
+  if (rpm < 0.0F) {
+    rpm = 0.0F;
+  }
+
   for (mid_i = 0; mid_i < 360; mid_i++) {
     data[mid_i] = 1.0F;
   }
@@ -208,13 +201,13 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
   }
 
   memset(&data1[0], 0, 90U * sizeof(float));
-  if ((lamb <= 15.0F) && (lamb >= 0.0F)) {
+  if ((Vinf <= 15.0F) && (Vinf >= 0.0F)) {
     low_i = 1;
     low_ip1 = 2;
     high_i = 4;
     while (high_i > low_ip1) {
       mid_i = (low_i + high_i) >> 1;
-      if (lamb >= 5.0F * ((float)mid_i - 1.0F)) {
+      if (Vinf >= 5.0F * ((float)mid_i - 1.0F)) {
         low_i = mid_i;
         low_ip1 = mid_i + 1;
       } else {
@@ -222,13 +215,13 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
       }
     }
 
-    mu = (lamb - 5.0F * ((float)low_i - 1.0F)) / (float)(5 * low_i - 5 * (low_i
-      - 1));
-    if (mu == 0.0F) {
+    r = (Vinf - 5.0F * ((float)low_i - 1.0F)) / (float)(5 * low_i - 5 * (low_i -
+      1));
+    if (r == 0.0F) {
       for (j = 0; j < 90; j++) {
         data1[j] = fcnOutput[(low_i + (j << 2)) - 1];
       }
-    } else if (mu == 1.0F) {
+    } else if (r == 1.0F) {
       for (j = 0; j < 90; j++) {
         data1[j] = fcnOutput[low_i + (j << 2)];
       }
@@ -239,7 +232,7 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
         if (b_y1 == fcnOutput[low_ip1]) {
           data1[j] = b_y1;
         } else {
-          data1[j] = (1.0F - mu) * b_y1 + mu * fcnOutput[low_ip1];
+          data1[j] = (1.0F - r) * b_y1 + r * fcnOutput[low_ip1];
         }
       }
     }
@@ -259,10 +252,10 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
     low_ip1 = j * 10 + 10;
     for (low_i = 0; low_i < 5; low_i++) {
       high_i = (low_ip1 + low_i) - 10;
-      mu = data1[high_i];
+      b_y1 = data1[high_i];
       mid_i = (low_ip1 - low_i) - 1;
       data1[high_i] = data1[mid_i];
-      data1[mid_i] = mu;
+      data1[mid_i] = b_y1;
     }
 
     data2[j] = 0.0F;
@@ -282,13 +275,13 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
       }
     }
 
-    mu = (alpha - (float)varargin_1[low_i - 1]) / (float)(varargin_1[low_i] -
+    r = (alpha - (float)varargin_1[low_i - 1]) / (float)(varargin_1[low_i] -
       varargin_1[low_i - 1]);
-    if (mu == 0.0F) {
+    if (r == 0.0F) {
       for (j = 0; j < 9; j++) {
         data2[j] = data1[(low_i + j * 10) - 1];
       }
-    } else if (mu == 1.0F) {
+    } else if (r == 1.0F) {
       for (j = 0; j < 9; j++) {
         data2[j] = data1[low_i + j * 10];
       }
@@ -299,7 +292,7 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
         if (b_y1 == data1[low_ip1]) {
           data2[j] = b_y1;
         } else {
-          data2[j] = (1.0F - mu) * b_y1 + mu * data1[low_ip1];
+          data2[j] = (1.0F - r) * b_y1 + r * data1[low_ip1];
         }
       }
     }
@@ -336,7 +329,7 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
     y[5] = b_y1;
   }
 
-  *throttle = 0.0F;
+  *throttle = 1.0F;
   if ((rpm <= data2[8]) && (rpm >= data2[0])) {
     low_i = 1;
     low_ip1 = 2;
@@ -352,15 +345,15 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
     }
 
     b_y1 = data2[low_i - 1];
-    mu = (rpm - b_y1) / (data2[low_i] - b_y1);
-    if (mu == 0.0F) {
+    r = (rpm - b_y1) / (data2[low_i] - b_y1);
+    if (r == 0.0F) {
       *throttle = y[low_i - 1];
-    } else if (mu == 1.0F) {
+    } else if (r == 1.0F) {
       *throttle = y[low_i];
     } else {
       *throttle = y[low_i - 1];
       if (*throttle != y[low_i]) {
-        *throttle = (1.0F - mu) * *throttle + mu * y[low_i];
+        *throttle = (1.0F - r) * *throttle + r * y[low_i];
       }
     }
   }
@@ -383,7 +376,7 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
   fv11[1] = 5.0F;
   fv11[2] = 10.0F;
   fv11[3] = 15.0F;
-  interp1(fv11, fv12, lamb, fv13);
+  interp1(fv11, fv12, Vinf, fv13);
   for (mid_i = 0; mid_i < 10; mid_i++) {
     varargin_1[mid_i] = (signed char)(-10 * mid_i + 90);
     varargin_2[mid_i] = fv13[mid_i];
@@ -393,9 +386,9 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
     low_ip1 = varargin_1[mid_i];
     varargin_1[mid_i] = varargin_1[9 - mid_i];
     varargin_1[9 - mid_i] = (signed char)low_ip1;
-    mu = varargin_2[mid_i];
+    b_y1 = varargin_2[mid_i];
     varargin_2[mid_i] = varargin_2[9 - mid_i];
-    varargin_2[9 - mid_i] = mu;
+    varargin_2[9 - mid_i] = b_y1;
   }
 
   *Tmax = 0.0F;
@@ -413,16 +406,16 @@ void rpmtothrottle(float rpm, const float V_rel_B[3], float *throttle, float
       }
     }
 
-    mu = (alpha - (float)varargin_1[low_i - 1]) / (float)(varargin_1[low_i] -
+    r = (alpha - (float)varargin_1[low_i - 1]) / (float)(varargin_1[low_i] -
       varargin_1[low_i - 1]);
-    if (mu == 0.0F) {
+    if (r == 0.0F) {
       *Tmax = varargin_2[low_i - 1];
-    } else if (mu == 1.0F) {
+    } else if (r == 1.0F) {
       *Tmax = varargin_2[low_i];
     } else {
       *Tmax = varargin_2[low_i - 1];
       if (*Tmax != varargin_2[low_i]) {
-        *Tmax = (1.0F - mu) * *Tmax + mu * varargin_2[low_i];
+        *Tmax = (1.0F - r) * *Tmax + r * varargin_2[low_i];
       }
     }
   }

@@ -81,7 +81,7 @@ static int __write_header(FILE* fd)
 		fprintf(fd, ",mot_1,mot_2,mot_3,mot_4,mot_5,mot_6");
 	}
 	if(settings.log_motor_signals && settings.num_rotors==4){
-		fprintf(fd, ",mot_1,mot_2,mot_3,mot_4");
+		fprintf(fd, ",mot_1,mot_2,mot_3,mot_4,thrust_mot1,thrust_mot2,thrust_mot3,thrust_mot4");
 	}
 	if(settings.log_flight_mode){
 		fprintf(fd,",flight_mode");
@@ -196,10 +196,14 @@ static int __write_log_entry(FILE* fd, log_entry_t e)
 							e.mot_6);
 	}
 	if(settings.log_motor_signals && settings.num_rotors==4){
-		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F",		e.mot_1,\
+		fprintf(fd, ",%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F,%.4F",	e.mot_1,\
 							e.mot_2,\
 							e.mot_3,\
-							e.mot_4);
+							e.mot_4,\
+							e.thrust_mot1,\
+							e.thrust_mot2,\
+							e.thrust_mot3,\
+							e.thrust_mot4);
 	}
 	if(settings.log_flight_mode){
 
@@ -422,6 +426,11 @@ static log_entry_t __construct_new_entry()
 	l.mot_6		= fstate.m[5];
 	l.mot_7		= fstate.m[6];
 	l.mot_8		= fstate.m[7];
+ 
+	l.thrust_mot1 = fstate.mot[0];
+	l.thrust_mot2 = fstate.mot[1];
+	l.thrust_mot3 = fstate.mot[2];
+	l.thrust_mot4 = fstate.mot[3];
 
 	return l;
 }

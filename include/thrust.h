@@ -5,7 +5,7 @@
  * File: thrust.h
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 27-Sep-2020 23:59:27
+ * C/C++ source code generated on  : 04-Jan-2021 13:18:02
  */
 
 #ifndef THRUST_H
@@ -14,11 +14,11 @@
 /* Include Files */
 #include <stddef.h>
 #include <stdlib.h>
-#include <rtwtypes.h>
+#include "rtwtypes.h"
 
 /* Function Declarations */
 extern void thrust(float rpm_low, float rpm_high, float T, float rho, const
-                    float V_rel_B[3], float *rpm);
+                   float V_rel_B[3], float *rpm);
 
 #endif
 

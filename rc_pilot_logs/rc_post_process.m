@@ -1,21 +1,27 @@
-input = readtable('19.csv');
+input = readtable('15.csv');
 
 
 
 close all;
 
-input.flight_mode
+input.flight_mode(1)
 
 time=(input.last_step_ns-input.last_step_ns(1))*1e-9;
 % 
-% figure
-% plot(input.T_ref);
+figure
+plot(time',input.T_ref);
+xlabel('Time [s]')
+title('Tref'); 
 % 
-% figure;
-% plot(input.theta_ref);
+figure;
+plot(time',input.theta_ref);
+xlabel('Time [s]')
+title('theta_ref'); 
 % 
-% figure;
-% plot(input.phi_ref);
+figure;
+plot(time',figure);
+xlabel('Time [s]')
+title('phi_ref'); 
 % 
 % figure;
 % plot(input.uwind);
@@ -26,11 +32,79 @@ time=(input.last_step_ns-input.last_step_ns(1))*1e-9;
 % figure;
 % plot(input.wwind);
 % 
-% figure;
-% plot(input.rho);
+figure;
+plot(time',input.rho);
+xlabel('Time [s]')
+title('rho'); 
+
+figure(1);
+plot(time',input.u_Z);
+xlabel('Time [s]')
+title('Uz'); 
 
 figure;
+plot(time',input.thrust_mot1);
+hold on;
+plot(time',input.thrust_mot2);
+plot(time',input.thrust_mot3);
+plot(time',input.thrust_mot4);
+title('mot thrust')
+xlabel('Time [s]')
+legend('thrust1','thrust2','thrust3','thrust4');
+
+figure;
+plot(time',input.mot_1);
+hold on;
+plot(time',input.mot_2);
+plot(time',input.mot_3);
+plot(time',input.mot_4);
+title('mot throttle')
+xlabel('Time [s]')
+legend('throttle1','throttle2','throttle3','throttle4');
+
+figure;
+plot(time',input.rpm1);
+hold on;
 plot(time',input.rpm2);
+plot(time',input.rpm3);
+plot(time',input.rpm4);
+title('mot RPM')
+xlabel('Time [s]')
+legend('RPM1','RPM2','RPM3','RPM4');
+
+figure;
+plot(time',input.T_ref);
+xlabel('Time [s]');
+title('Ref Net Thrust');
+
+figure;
+plot(time',input.uwind);
+hold on;
+plot(time',input.vwind);
+plot(time',input.wwind);
+xlabel('Time [s]');
+title('Relative velocities');
+legend('U','V','W');
+
+figure;
+plot(time',input.sp_roll);
+hold on;
+plot(time',input.sp_pitch);
+plot(time',input.sp_yaw);
+xlabel('Time [s]');
+title('setpoint Euler');
+legend('sp_roll','sp_pitch','sp_yaw');
+
+figure;
+plot(time',input.roll);
+hold on;
+plot(time',input.pitch);
+plot(time',input.yaw);
+xlabel('Time [s]');
+title('Euler');
+legend('roll','pitch','yaw');
+
+%rpmtothrottle(8505.2754,[0.071,-0.049,-0.039])
 
 % subplot(1,3,1);
 % hold on;

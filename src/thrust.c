@@ -5,40 +5,38 @@
  * File: thrust.c
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 02-Jan-2021 07:00:08
+ * C/C++ source code generated on  : 05-Jan-2021 07:14:57
  */
 
 /* Include Files */
 #include "thrust.h"
-#include "trapz.h"
+#include "mytrapz.h"
 #include <arm_neon.h>
 #include <math.h>
 
 /* Function Declarations */
-static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
-  float M, const float th[13], const float c[13], const float cla[13], const
-  float r[13], float rpm);
+static float __anon_fcn(const float V_rel_B[3], float T, float rho, float M,
+  const float c2[234], const float psi2[234], const float rprime_cos_psinew[234],
+  const float psi_new[18], float rpm);
 
 /* Function Definitions */
 
 /*
  * Arguments    : const float V_rel_B[3]
  *                float T
- *                float nb
  *                float rho
  *                float M
- *                const float th[13]
- *                const float c[13]
- *                const float cla[13]
- *                const float r[13]
+ *                const float c2[234]
+ *                const float psi2[234]
+ *                const float rprime_cos_psinew[234]
+ *                const float psi_new[18]
  *                float rpm
  * Return Type  : float
  */
-static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
-  float M, const float th[13], const float c[13], const float cla[13], const
-  float r[13], float rpm)
+static float __anon_fcn(const float V_rel_B[3], float T, float rho, float M,
+  const float c2[234], const float psi2[234], const float rprime_cos_psinew[234],
+  const float psi_new[18], float rpm)
 {
-  float varargout_1;
   float er1;
   float mu;
   float lamb_tot;
@@ -47,34 +45,101 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   float ct;
   float lamb;
   float lambnew;
-  float32x4_t b_r;
-  float32x4_t r1;
-  float32x4_t r2;
   int k;
-  int lam_tmp;
-  float psi_new[18];
-  float lam[234];
-  float psi2[234];
-  float32x4_t r3;
-  int ibmat;
-  float ut[234];
-  float phi[234];
-  float b[234];
   float sigma[234];
-  float y[234];
-  float b_y[234];
-  float b_b[234];
-  float fcnOutput[234];
-  float alp[234];
   float fv[13];
-  float c_r[13];
-  float32x4_t r4;
-  float32x4_t r5;
-  float32x4_t r6;
-  float32x4_t r7;
-  float b_nb[13];
-  float32x4_t r8;
-  float32x4_t r9;
+  float32x4_t r;
+  static const float fv1[234] = { 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
+    0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F,
+    0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F,
+    0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F,
+    0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F,
+    0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F,
+    0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F,
+    0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F,
+    0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F,
+    0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F,
+    0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F,
+    0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F,
+    0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F,
+    0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
+    0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F,
+    0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F,
+    0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F,
+    0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F,
+    0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F,
+    0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F,
+    0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F,
+    0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F,
+    0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F,
+    0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F,
+    0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F,
+    0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F,
+    0.8706F, 0.9446F, 0.9901F, 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
+    0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F,
+    0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F, 0.5006F, 0.5746F, 0.6486F,
+    0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F };
+
+  float32x4_t r1;
+  float f;
+  float32x4_t r2;
+  float f1;
+  static const float fv2[234] = { 0.745006561F, 0.683106542F, 0.605806589F,
+    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
+    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F,
+    0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F,
+    0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F,
+    0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F,
+    0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F,
+    0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F,
+    0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F,
+    0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F,
+    0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F,
+    0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F,
+    0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F,
+    0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F,
+    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
+    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F,
+    0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F,
+    0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F,
+    0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F,
+    0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F,
+    0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F,
+    0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F,
+    0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F,
+    0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F,
+    0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F,
+    0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F,
+    0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F,
+    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
+    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F,
+    0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F,
+    0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F,
+    0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F,
+    0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F,
+    0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F,
+    0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F,
+    0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F,
+    0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F,
+    0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F,
+    0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F,
+    0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F, 0.605806589F,
+    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
+    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F,
+    0.745006561F, 0.683106542F, 0.605806589F, 0.504806578F, 0.432306588F,
+    0.378406584F, 0.337006599F, 0.30420661F, 0.27780658F, 0.256006598F,
+    0.237706587F, 0.222206578F, 0.213806584F, 0.745006561F, 0.683106542F,
+    0.605806589F, 0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F,
+    0.30420661F, 0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F,
+    0.213806584F };
+
+  float fv3[13];
+  float f2;
+  float f3;
+  float x;
+  static const float fv4[13] = { 0.0202285592F, 0.0240182392F, 0.0283260811F,
+    0.035824161F, 0.0433425605F, 0.0508609563F, 0.0583793558F, 0.0658977553F,
+    0.0734161586F, 0.0809345543F, 0.0884529576F, 0.0959713608F, 0.100594163F };
 
   /*  rotor characteristics */
   /*      Copyright (C) 12/12/2018  Regents of the University of Michigan */
@@ -94,7 +159,6 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   /*      along with this program.  If not, see <https://www.gnu.org/licenses/>. */
   /* sig=nb*mean(c)/(pi*R);        % blade solidity */
   /*  */
-  /*  relative incoming velocity */
   /*  2*pi/60 = 0.1047197 */
   /*  rad per second */
   er1 = rpm * 0.104719698F * 0.1016F;
@@ -145,229 +209,77 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
   /*  page 158 - 160 */
   /*  muz is the advance ratio prependicular to the rotor (lambda_c) */
   /*  mux is the advance ratio parallel to the rotor */
+  /*  mux = mu ; */
   /*  muz = lamb_tot; */
   /*  wake skew angle */
-  /*  different linear inflow models */
-  /*  Drees: */
-  /*  kx = 4/3 * (1 - cos(x) - 1.8 * mu^2) / sin(x) ; */
-  /*   */
-  /*  if x==0 */
-  /*      kx=0; */
-  /*  end */
-  /*   */
-  /*  ky = -2*mu; */
   /*  Pitt and Peters: */
   /*  15*pi/23 = 2.048864 */
-  lambnew = 2.04886389F * tanf(atanf(mu / lamb) / 2.0F);
+  er1 = 2.04886389F * tanf(atanf(mu / lamb) * 0.5F);
 
+  /*  ky = 0; */
   /*  fixing psi given a Vy velcoity, psi is defined when x is alinged with free stream */
-  er1 = atanf(-V_rel_B[1] / (V_rel_B[0] + 0.0001F));
-
+  /*  psi_new=psi-atan(-Vy/(Vx+0.0001)); */
   /*  constructing inflow ratio based on a linear model */
   /*  lambda is a matrix, rows r, and columns azimuth, (nr * npsi) */
-  b_r = vdupq_n_f32(0.0F);
-  r1 = vdupq_n_f32(lambnew);
-  r2 = vdupq_n_f32(1.0F);
-  for (k = 0; k < 18; k++) {
-    lamb_tot = 0.369599134F * (float)k - er1;
-    psi_new[k] = lamb_tot;
-    lamb_tot = cosf(lamb_tot);
-    r3 = vdupq_n_f32(lamb_tot);
-    vst1q_f32(&lam[13 * k], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
-      vld1q_f32(&r[0])), r3)), r2));
-    vst1q_f32(&psi2[13 * k], b_r);
-    lam_tmp = 13 * k + 4;
-    vst1q_f32(&lam[lam_tmp], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
-      vld1q_f32(&r[4])), r3)), r2));
-    vst1q_f32(&psi2[lam_tmp], b_r);
-    lam_tmp = 13 * k + 8;
-    vst1q_f32(&lam[lam_tmp], vaddq_f32(vaddq_f32(b_r, vmulq_f32(vmulq_f32(r1,
-      vld1q_f32(&r[8])), r3)), r2));
-    vst1q_f32(&psi2[lam_tmp], b_r);
-    lam_tmp = 13 * k + 12;
-    lam[lam_tmp] = lambnew * r[12] * lamb_tot + 1.0F;
-    psi2[lam_tmp] = 0.0F;
-  }
-
-  for (lam_tmp = 0; lam_tmp <= 228; lam_tmp += 4) {
-    b_r = vld1q_f32(&lam[lam_tmp]);
-    r1 = vld1q_f32(&psi2[lam_tmp]);
-    vst1q_f32(&lam[lam_tmp], vmulq_f32(vdupq_n_f32(lamb), vaddq_f32(b_r, r1)));
-  }
-
-  lam[232] = lamb * (lam[232] + psi2[232]);
-  lam[233] = lamb * (lam[233] + psi2[233]);
-
   /*  intergration to find roll and pitch for a rotor */
-  /*  nr*npsi */
-  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
-    ibmat = lam_tmp * 13;
-    for (k = 0; k < 13; k++) {
-      psi2[ibmat + k] = psi_new[lam_tmp];
-    }
-  }
-
-  /*  nr*npsi */
+  /*  r2=repmat(r',1,npsi);        % nr*npsi */
+  /*  psi2=repmat(psi_new,nr,1);       % nr*npsi */
   /*  the incoming velocity seen by the blade */
   /*  for a quad-copter (no flpapping) */
-  for (k = 0; k < 234; k++) {
-    psi2[k] = sinf(psi2[k]);
-  }
-
-  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
-    ibmat = lam_tmp * 13;
-    for (k = 0; k < 13; k++) {
-      ut[ibmat + k] = r[k];
-    }
-  }
-
   /* u = (ut.^2 +up.^2) .^0.5 ; */
   /* usq = (ut.^2 +up.^2);  %u^2 */
   /*  matrix form of the variables */
-  for (k = 0; k < 234; k++) {
-    lamb_tot = ut[k] + mu * psi2[k];
-    ut[k] = lamb_tot;
-    phi[k] = atanf(lam[k] / lamb_tot);
-  }
-
-  /*  nr*npsi */
-  /*  nr*npsi */
-  /*  nr*npsi */
-  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
-    ibmat = lam_tmp * 13;
-    for (k = 0; k < 13; k++) {
-      b[ibmat + k] = th[k];
-    }
-  }
-
+  /* we can take this out of try11 */
+  /*  th2=repmat(th',1,npsi);      % nr*npsi */
+  /*  cla2=repmat(cla',1,npsi);     % nr*npsi */
+  /*  c2=repmat(c',1,npsi);        % nr*npsi */
   /*  based on Beard-McLain book page 47 to model stall condition */
   /*  180/pi = 57.2957795 */
   /*  lift generated by every annulus */
   /*  intergral int_0^{2pi} cl * 1/2 * rho * U^2 * c2 / (2pi) */
   /*  l = nb * trapz(psi_new, cl * 0.5 .* rho .* (vt*u).^2 .*c2 , 2) / (2*pi); */
   /*  (1/ 2pi) = 0.1591549 */
-  for (k = 0; k < 234; k++) {
-    lamb_tot = b[k] - phi[k];
-    b[k] = lamb_tot;
-    er1 = expf(M * ((lamb_tot - 0.0349065848F) + 0.35953784F));
-    lambnew = expf(-M * ((lamb_tot - 0.0349065848F) - 0.35953784F)) + 1.0F;
-    lambnew = (lambnew + er1) / (lambnew * (er1 + 1.0F));
-    sigma[k] = lambnew;
-    er1 = lamb_tot - 0.0349065848F;
-    if (lamb_tot - 0.0349065848F < 0.0F) {
-      er1 = -1.0F;
-    } else {
-      if (lamb_tot - 0.0349065848F > 0.0F) {
-        er1 = 1.0F;
-      }
-    }
-
-    fcnOutput[k] = er1;
-    psi2[k] = sinf(lamb_tot - 0.0349065848F);
-    alp[k] = cosf(lamb_tot - 0.0349065848F);
-    phi[k] = cosf(phi[k]);
-  }
-
   /*  note that vt wil be cancel out in ct calculations */
   /*  the error parameter defined between momentum and blade element theories */
   /*  Golden search: */
   /* er_ct=abs(ct_two-ct)/ct; */
   /*  use this if used fzero */
-  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
-    ibmat = lam_tmp * 13;
-    for (k = 0; k < 13; k++) {
-      b_b[ibmat + k] = cla[k];
+  for (k = 0; k < 234; k++) {
+    lambnew = lamb * (er1 * rprime_cos_psinew[k] + 1.0F);
+    lamb_tot = fv1[k] + mu * sinf(psi2[k]);
+    f = atanf(lambnew / lamb_tot);
+    f1 = fv2[k] - f;
+    f2 = expf(M * ((f1 - 0.0349065848F) + 0.35953784F));
+    f3 = expf(-M * ((f1 - 0.0349065848F) - 0.35953784F)) + 1.0F;
+    f3 = (f3 + f2) / (f3 * (f2 + 1.0F));
+    x = f1 - 0.0349065848F;
+    if (f1 - 0.0349065848F < 0.0F) {
+      x = -1.0F;
+    } else {
+      if (f1 - 0.0349065848F > 0.0F) {
+        x = 1.0F;
+      }
     }
+
+    f2 = sinf(f1 - 0.0349065848F);
+    f = cosf(f);
+    f3 = ((1.0F - f3) * (5.6548667F * f1) + f3 * (2.0F * x * (f2 * f2) * cosf(f1
+            - 0.0349065848F))) * 0.5F * rho * inv_pd_tmp * (lamb_tot * lamb_tot
+      + lambnew * lambnew) * c2[k] * f;
+    sigma[k] = f3;
   }
 
-  for (k = 0; k <= 228; k += 4) {
-    b_r = vld1q_f32(&psi2[k]);
-    vst1q_f32(&y[k], vmulq_f32(b_r, b_r));
-    b_r = vld1q_f32(&ut[k]);
-    vst1q_f32(&b_y[k], vmulq_f32(b_r, b_r));
-    b_r = vld1q_f32(&lam[k]);
-    vst1q_f32(&ut[k], vmulq_f32(b_r, b_r));
-  }
-
-  y[232] = psi2[232] * psi2[232];
-  b_y[232] = ut[232] * ut[232];
-  ut[232] = lam[232] * lam[232];
-  y[233] = psi2[233] * psi2[233];
-  b_y[233] = ut[233] * ut[233];
-  ut[233] = lam[233] * lam[233];
-  for (lam_tmp = 0; lam_tmp < 18; lam_tmp++) {
-    ibmat = lam_tmp * 13;
-    for (k = 0; k < 13; k++) {
-      psi2[ibmat + k] = c[k];
-    }
-  }
-
-  for (lam_tmp = 0; lam_tmp <= 228; lam_tmp += 4) {
-    b_r = vld1q_f32(&sigma[lam_tmp]);
-    r1 = vld1q_f32(&b_b[lam_tmp]);
-    r2 = vld1q_f32(&b[lam_tmp]);
-    r3 = vld1q_f32(&fcnOutput[lam_tmp]);
-    r4 = vld1q_f32(&y[lam_tmp]);
-    r5 = vld1q_f32(&alp[lam_tmp]);
-    r6 = vld1q_f32(&b_y[lam_tmp]);
-    r7 = vld1q_f32(&ut[lam_tmp]);
-    r8 = vld1q_f32(&psi2[lam_tmp]);
-    r9 = vld1q_f32(&phi[lam_tmp]);
-    vst1q_f32(&sigma[lam_tmp], vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32(vmulq_f32
-      (vmulq_f32(vaddq_f32(vmulq_f32(vsubq_f32(vdupq_n_f32(1.0F), b_r),
-      vmulq_f32(r1, r2)), vmulq_f32(b_r, vmulq_f32(vmulq_f32(vmulq_f32
-      (vdupq_n_f32(2.0F), r3), r4), r5))), vdupq_n_f32(0.5F)), vdupq_n_f32(rho)),
-      vdupq_n_f32(inv_pd_tmp)), vaddq_f32(r6, r7)), r8), r9));
-  }
-
-  sigma[232] = ((1.0F - sigma[232]) * (b_b[232] * b[232]) + sigma[232] * (2.0F *
-    fcnOutput[232] * y[232] * alp[232])) * 0.5F * rho * inv_pd_tmp * (b_y[232] +
-    ut[232]) * psi2[232] * phi[232];
-  sigma[233] = ((1.0F - sigma[233]) * (b_b[233] * b[233]) + sigma[233] * (2.0F *
-    fcnOutput[233] * y[233] * alp[233])) * 0.5F * rho * inv_pd_tmp * (b_y[233] +
-    ut[233]) * psi2[233] * phi[233];
-  trapz(psi_new, sigma, fv);
-  b_r = vdupq_n_f32(0.1016F);
-  vst1q_f32(&c_r[0], vmulq_f32(vld1q_f32(&r[0]), b_r));
-  r1 = vld1q_f32(&fv[0]);
-  r2 = vdupq_n_f32(nb);
-  r3 = vdupq_n_f32(0.159154907F);
-  vst1q_f32(&b_nb[0], vmulq_f32(vmulq_f32(r2, r1), r3));
-  vst1q_f32(&c_r[4], vmulq_f32(vld1q_f32(&r[4]), b_r));
-  r1 = vld1q_f32(&fv[4]);
-  vst1q_f32(&b_nb[4], vmulq_f32(vmulq_f32(r2, r1), r3));
-  vst1q_f32(&c_r[8], vmulq_f32(vld1q_f32(&r[8]), b_r));
-  r1 = vld1q_f32(&fv[8]);
-  vst1q_f32(&b_nb[8], vmulq_f32(vmulq_f32(r2, r1), r3));
-  c_r[12] = r[12] * 0.1016F;
-  b_nb[12] = nb * fv[12] * 0.159154907F;
-  varargout_1 = (b_trapz(c_r, b_nb) * inv_pd - ct) / ct;
-
-  /*  blade profile drag */
-  /*  Cd0=0.0081-0.0216*aoa+0.4*aoa^2; from helicopter literature, note aoa is the angle of attack - page 14, chapter 2 of Friedmann notes */
-  /*  Cd0=0.008; */
-  /*  f is the equivalent flat plate area that copter frame occupies in space */
-  /*  -- note that a quarter of the area should be used since this is model for */
-  /*  for a helicopter, f/A is between 0.004 to 0.025 */
-  /*  f=0.005*A * 0.25; */
-  /* cmyaw=0; */
-  /*  cmyaw=sig * Cd0 * 0.125 * (1 + 4.6* mu^2) + ... */
-  /*       1.15 * 0.5 * ct_two^2 / sqrt(mu^2+lamb^2) + ... */
-  /*       f * mu^3 /(2*pi*R^2) +... */
-  /*       ct_two*lambc ; */
-  /*  yaw=cmyaw*(rho*pi*R^3*vt^2); */
-  /*  nu=1.534e-5; */
-  /*  Re=u.*c2*vt*65189.048; */
-  /*  x point to the nose of the vehicle, y to the right wing (pilot's right), */
-  /*  z pointing downward - right wing dowm, nose up, right wing back are */
-  /*  positive roll, pitch, yaw moments. psi = 0, starts farther from the */
-  /*  inflow, x<0 */
-  /*  x=-r2.*cos(psi2)*R; */
-  /*  y=r2.*sin(psi2)*R; */
-  /*  1/(2*pi) = 0.15915494 */
-  /*  roll = trapz(r*R,nb* 0.15915494*trapz(psi_new,-y.*term,2)); */
-  /*  pitch = trapz(r*R,nb* 0.15915494*trapz(psi_new,x.*term,2)); */
-  return varargout_1;
+  mytrapz(psi_new, sigma, fv);
+  r = vld1q_f32(&fv[0]);
+  r1 = vdupq_n_f32(2.0F);
+  r2 = vdupq_n_f32(0.159154907F);
+  vst1q_f32(&fv3[0], vmulq_f32(vmulq_f32(r1, r), r2));
+  r = vld1q_f32(&fv[4]);
+  vst1q_f32(&fv3[4], vmulq_f32(vmulq_f32(r1, r), r2));
+  r = vld1q_f32(&fv[8]);
+  vst1q_f32(&fv3[8], vmulq_f32(vmulq_f32(r1, r), r2));
+  fv3[12] = 2.0F * fv[12] * 0.159154907F;
+  return (b_mytrapz(fv4, fv3) * inv_pd - ct) / ct;
 }
 
 /*
@@ -378,23 +290,54 @@ static float __anon_fcn(const float V_rel_B[3], float T, float nb, float rho,
  *                float rho
  *                const float V_rel_B[3]
  *                float *rpm
+ *                float *fakerpm
  * Return Type  : void
  */
 void thrust(float rpm_low, float rpm_high, float T, float rho, const float
             V_rel_B[3], float *rpm)
 {
-  float a;
-  int i;
   float fa;
-  static const float fv[13] = { 0.745006561F, 0.683106542F, 0.605806589F,
-    0.504806578F, 0.432306588F, 0.378406584F, 0.337006599F, 0.30420661F,
-    0.27780658F, 0.256006598F, 0.237706587F, 0.222206578F, 0.213806584F };
+  int jcol;
+  float p;
+  float psi_new[18];
+  int ibmat;
+  float a;
+  float32x4_t r;
+  float psi2[234];
+  float32x4_t r1;
+  static const float fv[234] = { 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F,
+    0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F,
+    0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F,
+    0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F,
+    0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F,
+    0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F,
+    0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F,
+    0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F,
+    0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F,
+    0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F,
+    0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F,
+    0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F,
+    0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F,
+    0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F,
+    0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F,
+    0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F,
+    0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F,
+    0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F,
+    0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F,
+    0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F,
+    0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F,
+    0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F,
+    0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F,
+    0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F,
+    0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F,
+    0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F,
+    0.0112F, 0.0084F, 0.004F, 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F,
+    0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F,
+    0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F, 0.0213F, 0.0199F, 0.0181F,
+    0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F };
 
-  static const float fv1[13] = { 0.0176F, 0.0196F, 0.0213F, 0.0227F, 0.0223F,
-    0.0213F, 0.0199F, 0.0181F, 0.0161F, 0.0137F, 0.0112F, 0.0084F, 0.004F };
-
-  float fv2[13];
-  static const float fv3[13] = { 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
+  float subfcn2_tunableEnvironment_f5[234];
+  static const float b_a[13] = { 0.1991F, 0.2364F, 0.2788F, 0.3526F, 0.4266F,
     0.5006F, 0.5746F, 0.6486F, 0.7226F, 0.7966F, 0.8706F, 0.9446F, 0.9901F };
 
   float fb;
@@ -405,13 +348,12 @@ void thrust(float rpm_low, float rpm_high, float T, float rho, const float
   bool exitg1;
   float m;
   float s;
-  float q;
-  float r;
+  float b_r;
 
   /*  did this with two outputs so that Codgen makes a pointer type output */
   /*  propeller radius  [m] */
   /*  number of blade */
-  /*  rotor disk area */
+  /* A=pi*R^2;                            % rotor disk area */
   /*  stall transition rate */
   /*  stall cut-off aoa */
   /*  absolute values of angle of attack where lift is zero */
@@ -421,20 +363,45 @@ void thrust(float rpm_low, float rpm_high, float T, float rho, const float
   /*  number of data point in azimuth */
   /*  2-D lift curve slope */
   /*  azimuth angle */
+  /*  */
+  /*  nr*npsi */
+  /*  nr*npsi */
+  /*  nr*npsi */
+  /*  nr*npsi */
+  fa = atanf(-V_rel_B[1] / (V_rel_B[0] + 0.0001F));
+
+  /*  nr*npsi */
+  for (jcol = 0; jcol < 18; jcol++) {
+    p = 0.369599134F * (float)jcol - fa;
+    psi_new[jcol] = p;
+    ibmat = jcol * 13;
+    a = cosf(p);
+    r = vdupq_n_f32(p);
+    vst1q_f32(&psi2[ibmat], r);
+    r1 = vdupq_n_f32(a);
+    vst1q_f32(&subfcn2_tunableEnvironment_f5[13 * jcol], vmulq_f32(vld1q_f32
+               (&b_a[0]), r1));
+    vst1q_f32(&psi2[ibmat + 4], r);
+    vst1q_f32(&subfcn2_tunableEnvironment_f5[13 * jcol + 4], vmulq_f32(vld1q_f32
+               (&b_a[4]), r1));
+    vst1q_f32(&psi2[ibmat + 8], r);
+    vst1q_f32(&subfcn2_tunableEnvironment_f5[13 * jcol + 8], vmulq_f32(vld1q_f32
+               (&b_a[8]), r1));
+    psi2[ibmat + 12] = p;
+    subfcn2_tunableEnvironment_f5[13 * jcol + 12] = b_a[12] * a;
+  }
+
+  /*  old way of doing it */
+  /* subfcn2 = @(rpm) try11(rpm,V_rel_B,T,R,nb,A,rho,nr,npsi,M,alp0,aLeq0,th',c',cla,r',psi); */
+  /*  */
   /* #codejen */
   /*  Initialization */
   a = rpm_low;
   *rpm = rpm_high;
-  for (i = 0; i < 13; i++) {
-    fv2[i] = 5.6548667F;
-  }
-
-  fa = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, rpm_low);
-  for (i = 0; i < 13; i++) {
-    fv2[i] = 5.6548667F;
-  }
-
-  fb = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, rpm_high);
+  fa = __anon_fcn(V_rel_B, T, rho, 50.0F, fv, psi2,
+                  subfcn2_tunableEnvironment_f5, psi_new, rpm_low);
+  fb = __anon_fcn(V_rel_B, T, rho, 50.0F, fv, psi2,
+                  subfcn2_tunableEnvironment_f5, psi_new, rpm_high);
   if (fa == 0.0F) {
     *rpm = rpm_low;
   } else {
@@ -482,27 +449,27 @@ void thrust(float rpm_low, float rpm_high, float T, float rho, const float
             s = fb / fa;
             if (a == c) {
               /*  Linear interpolation */
-              fa = 2.0F * m * s;
-              q = 1.0F - s;
+              p = 2.0F * m * s;
+              fa = 1.0F - s;
             } else {
               /*  Inverse quadratic interpolation */
-              q = fa / fc;
-              r = fb / fc;
-              fa = s * (2.0F * m * q * (q - r) - (*rpm - a) * (r - 1.0F));
-              q = (q - 1.0F) * (r - 1.0F) * (s - 1.0F);
+              fa /= fc;
+              b_r = fb / fc;
+              p = s * (2.0F * m * fa * (fa - b_r) - (*rpm - a) * (b_r - 1.0F));
+              fa = (fa - 1.0F) * (b_r - 1.0F) * (s - 1.0F);
             }
 
-            if (fa > 0.0F) {
-              q = -q;
-            } else {
+            if (p > 0.0F) {
               fa = -fa;
+            } else {
+              p = -p;
             }
 
             /*  Is interpolated point acceptable */
-            if ((2.0F * fa < 3.0F * m * q - fabsf(20.0F * q)) && (fa < fabsf
-                 (0.5F * e * q))) {
+            if ((2.0F * p < 3.0F * m * fa - fabsf(20.0F * fa)) && (p < fabsf
+                 (0.5F * e * fa))) {
               e = d;
-              d = fa / q;
+              d = p / fa;
             } else {
               d = m;
               e = m;
@@ -521,18 +488,14 @@ void thrust(float rpm_low, float rpm_high, float T, float rho, const float
             *rpm += 20.0F;
           }
 
-          for (i = 0; i < 13; i++) {
-            fv2[i] = 5.6548667F;
-          }
-
-          fb = __anon_fcn(V_rel_B, T, 2.0F, rho, 50.0F, fv, fv1, fv2, fv3, *rpm);
+          fb = __anon_fcn(V_rel_B, T, rho, 50.0F, fv, psi2,
+                          subfcn2_tunableEnvironment_f5, psi_new, *rpm);
         }
       }
     }
   }
 
   /*  Main loop */
-
 }
 
 /*

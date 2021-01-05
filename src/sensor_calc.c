@@ -18,6 +18,7 @@
 #include <feedback.h>
 #include <settings.h>
 #include <errno.h> 
+#include <time.h>
 
 int i;
 
@@ -89,6 +90,7 @@ float init_read_from_serial()
 }
 
 void read_sensor_data() {
+
 	int bytes_read = 1;
 	int i=-1;
 	char array[1500];
@@ -157,8 +159,8 @@ void calculate_feedforward(){
 
 void calculate_rpm() {
 		// initial lower and upper bands
-	float lb[] = {100.F, 100.F, 100.F, 100.F};
-	float ub[] = {12000.F, 12000.F, 12000.F, 12000.F};
+	float lb[] = {1000.F, 1000.F, 1000.F, 1000.F};
+	float ub[] = {9000.F, 9000.F, 9000.F, 9000.F};
 	 // finding maxim thrust
 	float ignore;
 	float Tmax;
@@ -172,13 +174,16 @@ void calculate_rpm() {
 	for(i=0;i<settings.num_rotors;i++){
 		
 		
-		// if (sensor_calc_msmt.rpm[i] > 0) { // If rpm has already been calculated once.
-		// 	lb[i] = sensor_calc_msmt.rpm[i] - 500;
-		// 	ub[i] = sensor_calc_msmt.rpm[i] + 500;
-		// 	if (lb[i] < 0) {
-		// 		lb[i]=100;
-		// 	}
-		// }
+		if (sensor_calc_msmt.rpm[i] > 0) { // If rpm has already been calculated once.
+			lb[i] = sensor_calc_msmt.rpm[i] - 600;
+			ub[i] = sensor_calc_msmt.rpm[i] + 600;
+			if (lb[i] < 0) {
+				lb[i]=1000;
+			}
+		}
+	// sensor_calc_msmt.vel[0] = 1.1F;
+	// sensor_calc_msmt.vel[1] = 2.2F;
+	// sensor_calc_msmt.vel[2] = -2.2F;
 		
 		thrust(lb[i],ub[i],fstate.mot[i]*sensor_calc_msmt.Tmax,sensor_calc_msmt.rho,sensor_calc_msmt.vel,&rpm);
 		sensor_calc_msmt.rpm[i]=rpm;
@@ -218,12 +223,52 @@ void* sensor_calc_manager(void* ptr) {
 
 
 	while(rc_get_state()!=EXITING){
+
+	 // clock_t start1, end1;
+  //    double cpu_time_used1;
+  //    start1 = clock();
+
 		read_sensor_data();
+
+	 // end1 = clock();
+  //    cpu_time_used1 = ((double) (end1 - start1)) / CLOCKS_PER_SEC;
+  //    printf("reading sensor takes %lf\n",cpu_time_used1);
+     
+      // clock_t start2, end2;
+      // double cpu_time_used2;
+      // start2 = clock();
+
 	    calculate_rpm();
+
+	  // end2 = clock();
+   //    cpu_time_used2 = ((double) (end2 - start2)) / CLOCKS_PER_SEC;
+     // printf("calculate rpm takes %lf\n",cpu_time_used2);
+
+     // clock_t start3, end3;
+     // double cpu_time_used3;
+     
+     // start3 = clock();
+	
 		calculate_throttle();
+	 
+	 // end3 = clock();
+  //    cpu_time_used3 = ((double) (end3 - start3)) / CLOCKS_PER_SEC;
+  //    printf("calculate throttle takes %lf\n",cpu_time_used3);
+
+     // clock_t start4, end4;
+     // double cpu_time_used4;
+     
+     // start4 = clock();
+		
 		calculate_feedforward();
+	
+	 // end4 = clock();
+  //    cpu_time_used4 = ((double) (end4 - start4)) / CLOCKS_PER_SEC;
+  //    printf("calculate feedforward takes%lf\n",cpu_time_used4);
+		
 		rc_usleep(100);
 	}
+
 	close(sensor_calc_msmt.fd);
 	return NULL;
 }

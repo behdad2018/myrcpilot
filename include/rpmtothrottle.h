@@ -5,7 +5,7 @@
  * File: rpmtothrottle.h
  *
  * MATLAB Coder version            : 5.0
- * C/C++ source code generated on  : 11-Dec-2020 01:16:32
+ * C/C++ source code generated on  : 03-Jan-2021 21:55:02
  */
 
 #ifndef RPMTOTHROTTLE_H

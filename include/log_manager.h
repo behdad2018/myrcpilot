@@ -132,6 +132,13 @@ typedef struct log_entry_t{
 	double	mot_7;
 	double	mot_8;
 	///@}
+	//B:
+
+	double thrust_mot1;
+	double thrust_mot2;
+	double thrust_mot3;
+	double thrust_mot4;
+	
 
 	    /** @name dsm connection valid */
     ///@{
